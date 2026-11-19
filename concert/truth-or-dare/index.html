@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#120c07">
+<title>真心话大冒险｜大冰的小屋</title>
+<style>
+/* 标题字：阿里妈妈数黑体（只含本页固定标题用字，2.8KB；其余文字用系统黑体） */
+@font-face{font-family:"Alimama ShuHeiTi";font-weight:700;font-display:swap;
+  src:url("../assets/fonts/AlimamaShuHeiTi-Bold.game.woff2") format("woff2");
+  unicode-range:U+30-39,U+4E00,U+5165,U+5192,U+51FA,U+5230,U+5927,U+5EA7,U+5F20,U+5FC3,U+771F,U+7B2C,U+8BDD,U+8F6E,U+9009,U+9669,U+9898,U+FF01,U+FF1F}
+:root{
+  --bg:#120c07; --ink:#1a0f06;
+  --tan:#cdb187; --tan-dim:rgba(205,177,135,.6); --tan-faint:rgba(205,177,135,.22);
+  --cream:#e6cfa6; --amber:#e0934a; --red:#e5513a; --acid:#e6cfa6;
+  --sans:"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Source Han Sans SC","Microsoft YaHei",sans-serif;
+  --display:"Alimama ShuHeiTi","PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Microsoft YaHei",sans-serif;
+  --u:min(1vw,.5vh,5px);            /* 版式单位：手机铺满，桌面端收成手机画幅 */
+  --top:env(safe-area-inset-top); --bot:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#000;overflow:hidden;overscroll-behavior:none}
+body{font-family:var(--sans);font-weight:500;color:var(--cream);-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none}
+button,input{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+
+.app{position:fixed;left:50%;top:0;width:calc(var(--u)*100);height:100%;transform:translateX(-50%);overflow:hidden;background:var(--bg)}
+.app::after{content:"";position:absolute;inset:0;z-index:60;pointer-events:none;opacity:.1;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ---------- 换屏 ---------- */
+.view{position:absolute;inset:0;overflow:hidden;opacity:0;visibility:hidden;transform:translateY(4%);
+  transition:opacity .45s ease,transform .6s cubic-bezier(.2,.7,.2,1),visibility 0s .6s}
+.app[data-view=cover] .v-cover,.app[data-view=seats] .v-seats,.app[data-view=write] .v-write,.app[data-view=play] .v-play{
+  opacity:1;visibility:visible;transform:none;transition-delay:0s}
+
+
+/* ---------- 通用按钮 ---------- */
+.btn{display:flex;align-items:center;justify-content:center;height:calc(var(--u)*13.5);padding:0 calc(var(--u)*7);border-radius:calc(var(--u)*7);
+  font-size:calc(var(--u)*4.4);font-weight:600;letter-spacing:.24em;text-indent:.24em;background:var(--cream);color:var(--ink);
+  box-shadow:0 calc(var(--u)*1.5) calc(var(--u)*6) rgba(0,0,0,.45);transition:transform .15s,opacity .3s}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.35;pointer-events:none}
+.btn.ghost{background:rgba(16,10,6,.55);color:var(--cream);border:1px solid var(--tan-dim);font-weight:500;box-shadow:none;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.link{font-size:calc(var(--u)*3.5);letter-spacing:.14em;color:var(--tan);padding:calc(var(--u)*2.5) calc(var(--u)*3)}
+.link:active{opacity:.6}
+
+/* ---------- 封面：图形海报，不用照片 ---------- */
+.blob{position:absolute;border-radius:50%;filter:blur(calc(var(--u)*13));pointer-events:none}
+.b1{width:calc(var(--u)*72);height:calc(var(--u)*72);right:calc(var(--u)*-18);top:36%;background:#e0934a;opacity:.42}
+.b2{width:calc(var(--u)*80);height:calc(var(--u)*80);left:calc(var(--u)*-32);top:50%;background:#b5361f;opacity:.36}
+.b3{width:calc(var(--u)*56);height:calc(var(--u)*56);left:calc(var(--u)*-22);top:calc(var(--u)*-16);background:#7a5a36;opacity:.3}
+.v-cover .shade{background:linear-gradient(180deg,rgba(0,0,0,.1) 0%,rgba(0,0,0,0) 45%,rgba(16,10,6,.9) 86%)}
+.brand{position:absolute;z-index:4;left:calc(var(--u)*8);top:calc(var(--u)*8 + var(--top));font-size:calc(var(--u)*3.3);letter-spacing:.5em;color:rgba(230,207,166,.6)}
+.badge{position:absolute;z-index:4;right:calc(var(--u)*5);top:calc(var(--u)*15 + var(--top));width:calc(var(--u)*25);height:calc(var(--u)*25);animation:turn 22s linear infinite}
+.badge text{font:700 9.2px var(--sans);letter-spacing:.06em;fill:#e6cfa6}
+.badge circle{fill:var(--amber)}
+@keyframes turn{to{transform:rotate(360deg)}}
+.cover-title{position:absolute;z-index:3;left:calc(var(--u)*7);right:calc(var(--u)*7);top:calc(var(--u)*27 + var(--top));white-space:nowrap;
+  font-family:var(--display);font-weight:700;font-size:calc(var(--u)*20);line-height:1;color:#e6cfa6;
+  text-shadow:0 calc(var(--u)*.8) calc(var(--u)*4) rgba(0,0,0,.55)}
+.cover-title span{display:block}
+.cover-title span+span{color:var(--amber)}
+.spark{position:absolute;z-index:3;fill:#e6cfa6}
+.art{position:absolute;z-index:2;left:0;right:0;top:calc(var(--u)*66 + var(--top));height:calc(var(--u)*86)}
+.cover-say{position:absolute;z-index:4;left:calc(var(--u)*8);right:calc(var(--u)*8);bottom:calc(var(--u)*40 + var(--bot));text-align:center;font-size:calc(var(--u)*3.6);letter-spacing:.14em;color:rgba(230,207,166,.86);text-shadow:0 1px calc(var(--u)*2) rgba(0,0,0,.9)}
+.v-cover .foot{z-index:4}
+.v-cover .link{color:rgba(230,207,166,.8)}
+@media (prefers-reduced-motion:reduce){.badge{animation:none}}
+.art .c{position:absolute;width:calc(var(--u)*41);height:calc(var(--u)*57);border-radius:calc(var(--u)*5);padding:calc(var(--u)*4.5);
+  display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 calc(var(--u)*4) calc(var(--u)*11) rgba(0,0,0,.5)}
+.art .c::before{content:"";position:absolute;inset:calc(var(--u)*2);border:1.5px solid currentColor;border-radius:calc(var(--u)*3.4);opacity:.35}
+.art .c{border:1px solid var(--amber);background:linear-gradient(155deg,#2c1d10,#150d07);color:var(--cream)}
+.art .c strong{color:var(--amber)}
+.art .c2{border-color:var(--red)} .art .c2 strong{color:var(--red)}
+.art .c::before{border:1px solid var(--tan-faint);opacity:1}
+.art .c1{left:calc(var(--u)*5);top:calc(var(--u)*14);transform:rotate(-11deg)}
+.art .c2{right:calc(var(--u)*7);top:calc(var(--u)*24);transform:rotate(8deg)}
+.art .c em{font-style:normal;font:800 calc(var(--u)*3.1)/1 var(--sans);letter-spacing:.3em}
+.art .c strong{align-self:flex-end;font-family:var(--display);font-weight:700;font-size:calc(var(--u)*30);line-height:.9}
+.art .c b{font-family:var(--display);font-weight:700;font-size:calc(var(--u)*8.6);line-height:1}
+.art .btl{position:absolute;left:50%;top:calc(var(--u)*2);width:calc(var(--u)*20);height:calc(var(--u)*62);margin-left:calc(var(--u)*-5);transform:rotate(24deg);
+  filter:drop-shadow(0 calc(var(--u)*2) calc(var(--u)*4) rgba(0,0,0,.55))}
+.cover-foot{position:absolute;z-index:4;left:calc(var(--u)*8);right:calc(var(--u)*8);bottom:calc(var(--u)*9 + var(--bot));text-align:center}
+.cover-foot p{font-size:calc(var(--u)*3.6);letter-spacing:.16em;color:rgba(230,207,166,.86);margin-bottom:calc(var(--u)*6);text-shadow:0 1px calc(var(--u)*2) rgba(0,0,0,.9)}
+.cover-foot .btn{width:100%}
+.cover-foot .link{display:inline-block;margin-top:calc(var(--u)*2)}
+
+/* ---------- 入座 / 出题（表单屏） ---------- */
+.form{display:flex;flex-direction:column;padding:calc(var(--u)*9 + var(--top)) calc(var(--u)*7) calc(var(--u)*8 + var(--bot));}
+.form .eyebrow{font-size:calc(var(--u)*3.2);letter-spacing:.42em;color:var(--tan-dim)}
+.form h2{margin-top:calc(var(--u)*2);font-family:var(--display);font-weight:700;font-size:calc(var(--u)*17);line-height:1.05;color:var(--cream)}
+.form .lead{margin-top:calc(var(--u)*3);font-size:calc(var(--u)*3.7);line-height:1.8;letter-spacing:.08em;color:rgba(230,207,166,.78)}
+.field{display:flex;gap:calc(var(--u)*2.5);margin-top:calc(var(--u)*6)}
+.field input{flex:1;min-width:0;height:calc(var(--u)*12.5);padding:0 calc(var(--u)*4.5);border-radius:calc(var(--u)*6.25);border:1px solid var(--tan-faint);
+  background:rgba(16,10,6,.6);font-size:calc(var(--u)*4.1);letter-spacing:.06em;outline:none;-webkit-user-select:text;user-select:text}
+.field input:focus{border-color:var(--amber)}
+.field input::placeholder{color:rgba(230,207,166,.4)}
+.field .btn{height:calc(var(--u)*12.5);padding:0 calc(var(--u)*6);font-size:calc(var(--u)*3.9);box-shadow:none}
+.scroll{flex:1;min-height:0;overflow-y:auto;margin-top:calc(var(--u)*5);-webkit-overflow-scrolling:touch}
+.form .actions{display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*1);padding-top:calc(var(--u)*4)}
+.form .actions .btn{width:100%}
+
+.seat{display:flex;align-items:center;gap:calc(var(--u)*3.5);padding:calc(var(--u)*3) 0;border-bottom:1px solid var(--tan-faint)}
+.seat .no{flex:none;width:calc(var(--u)*7);font-family:var(--display);font-weight:700;font-size:calc(var(--u)*6);color:var(--tan-dim)}
+.seat .nm{flex:1;min-width:0;font-size:calc(var(--u)*4.6);font-weight:600;letter-spacing:.08em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seat .st{flex:none;font-size:calc(var(--u)*3);letter-spacing:.08em;color:var(--tan-dim)}
+.seat .x{flex:none;width:calc(var(--u)*8);height:calc(var(--u)*8);border-radius:50%;border:1px solid var(--tan-faint);color:var(--tan);font-size:calc(var(--u)*4);line-height:1}
+.empty{padding:calc(var(--u)*6) 0;font-size:calc(var(--u)*3.6);letter-spacing:.1em;color:var(--tan-dim)}
+
+.seg{display:flex;margin-top:calc(var(--u)*6);border:1px solid var(--tan-faint);border-radius:calc(var(--u)*6);overflow:hidden}
+.seg button{flex:1;height:calc(var(--u)*11);font-size:calc(var(--u)*3.9);letter-spacing:.2em;color:var(--tan-dim)}
+.seg button.on[data-type=truth]{background:var(--amber);color:var(--ink);font-weight:600}
+.seg button.on[data-type=dare]{background:var(--red);color:#fff;font-weight:600}
+.seg+.field{margin-top:calc(var(--u)*3)}
+.tally{display:flex;gap:calc(var(--u)*4)}
+.tally div{flex:1;padding:calc(var(--u)*4);border:1px solid var(--tan-faint);border-radius:calc(var(--u)*3.5);background:rgba(16,10,6,.45)}
+.tally b{display:block;font-family:var(--display);font-size:calc(var(--u)*11);line-height:1;color:var(--amber)}
+.tally div+div b{color:var(--red)}
+.tally span{display:block;margin-top:calc(var(--u)*1.5);font-size:calc(var(--u)*3.1);letter-spacing:.14em;color:var(--tan-dim)}
+.check{display:flex;align-items:center;gap:calc(var(--u)*3);margin-top:calc(var(--u)*5);font-size:calc(var(--u)*3.6);letter-spacing:.08em;color:var(--tan)}
+.check input{width:calc(var(--u)*5);height:calc(var(--u)*5);accent-color:var(--amber)}
+
+/* ---------- 游戏 ---------- */
+.bar{position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*4);top:calc(var(--u)*6 + var(--top));display:flex;align-items:center;justify-content:space-between}
+.round{font-family:var(--display);font-weight:700;font-size:calc(var(--u)*6.4);color:var(--cream)}
+.round small{font:500 calc(var(--u)*3.1) var(--sans);letter-spacing:.3em;color:var(--tan-dim);margin-left:calc(var(--u)*2.5)}
+
+.ring{position:absolute;left:50%;top:calc(21% + var(--top));width:calc(var(--u)*88);height:calc(var(--u)*88);margin-left:calc(var(--u)*-44)}
+.ring::before{content:"";position:absolute;inset:calc(var(--u)*13);border-radius:50%;border:1px solid var(--tan-faint);
+  background:radial-gradient(circle,rgba(224,147,74,.2) 0%,rgba(224,147,74,.05) 55%,transparent 72%)}
+.ring::after{content:"";position:absolute;inset:calc(var(--u)*17);border-radius:50%;border:1px dashed var(--tan-faint)}
+.who{position:absolute;transform:translate(-50%,-50%);max-width:calc(var(--u)*24);padding:calc(var(--u)*1.4) calc(var(--u)*3.2);border-radius:calc(var(--u)*5);
+  border:1px solid var(--tan-faint);background:rgba(16,10,6,.7);font-size:calc(var(--u)*3.6);letter-spacing:.06em;color:var(--tan);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .4s,color .4s,transform .4s,box-shadow .4s}
+.who.on{background:var(--cream);color:var(--ink);font-weight:600;transform:translate(-50%,-50%) scale(1.18);box-shadow:0 0 calc(var(--u)*7) rgba(224,147,74,.6)}
+.bottle{position:absolute;left:50%;top:50%;width:calc(var(--u)*15);height:calc(var(--u)*46);margin:calc(var(--u)*-23) 0 0 calc(var(--u)*-7.5);
+  transition:transform 3.4s cubic-bezier(.12,.7,.12,1);filter:drop-shadow(0 calc(var(--u)*1.5) calc(var(--u)*3) rgba(0,0,0,.6))}
+.bottle svg{display:block;width:100%;height:100%}
+
+.prompt{position:absolute;left:0;right:0;bottom:calc(var(--u)*34 + var(--bot));text-align:center;font-size:calc(var(--u)*3.8);letter-spacing:.16em;color:rgba(230,207,166,.8)}
+.spin{position:absolute;left:calc(var(--u)*8);right:calc(var(--u)*8);bottom:calc(var(--u)*15 + var(--bot))}
+.note{position:absolute;left:0;right:0;bottom:calc(var(--u)*6 + var(--bot));text-align:center;font-size:calc(var(--u)*2.9);letter-spacing:.14em;color:var(--tan-dim)}
+
+/* 选牌 / 揭晓：盖在游戏屏上的一层 */
+.layer{position:absolute;inset:0;z-index:20;opacity:0;visibility:hidden;transition:opacity .4s ease,visibility 0s .4s;
+  background:rgba(16,10,6,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.app[data-step=choose] .l-choose,.app[data-step=reveal] .l-reveal{opacity:1;visibility:visible;transition-delay:0s}
+.turn{position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*7);top:calc(13% + var(--top))}
+.turn em{display:block;font-style:normal;font-family:var(--display);font-weight:700;font-size:calc(var(--u)*9);line-height:1;color:var(--tan-dim)}
+.turn b{display:block;margin:calc(var(--u)*1) 0 0 calc(var(--u)*9);font-weight:600;font-size:calc(var(--u)*14);line-height:1.15;letter-spacing:.04em;color:var(--cream);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.l-reveal .turn{top:calc(7% + var(--top))}
+.l-reveal .turn em{font-size:calc(var(--u)*6)} .l-reveal .turn b{font-size:calc(var(--u)*9)}
+
+.pick{position:absolute;left:0;right:0;top:calc(38% + var(--top));height:calc(var(--u)*66)}
+.pick button{position:absolute;top:0;width:calc(var(--u)*42);height:calc(var(--u)*60);border-radius:calc(var(--u)*4);border:1px solid var(--tan-dim);
+  background:linear-gradient(155deg,#2c1d10,#150d07);box-shadow:0 calc(var(--u)*3) calc(var(--u)*8) rgba(0,0,0,.55);
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:calc(var(--u)*4.5);text-align:left;transition:transform .25s}
+.pick button::before{content:"";position:absolute;inset:calc(var(--u)*2);border:1px solid var(--tan-faint);border-radius:calc(var(--u)*2.5)}
+.pick button::after{content:"?";position:absolute;right:calc(var(--u)*5);top:calc(var(--u)*3);font-family:var(--display);font-size:calc(var(--u)*22);line-height:1;opacity:.9}
+.pick .t{left:calc(var(--u)*7);transform:rotate(-7deg);border-color:var(--amber)}
+.pick .d{right:calc(var(--u)*7);top:calc(var(--u)*6);transform:rotate(6deg);border-color:var(--red)}
+.pick .t::after{color:var(--amber)} .pick .d::after{color:var(--red)}
+.pick .t:active{transform:rotate(-7deg) scale(.96)} .pick .d:active{transform:rotate(6deg) scale(.96)}
+.pick strong{position:relative;font-family:var(--display);font-weight:700;font-size:calc(var(--u)*9.4);line-height:1.08;color:var(--cream)}
+.pick span{position:relative;margin-top:calc(var(--u)*1.5);font-size:calc(var(--u)*3);letter-spacing:.14em;color:var(--tan-dim)}
+.l-choose .hintline{position:absolute;left:0;right:0;bottom:calc(var(--u)*9 + var(--bot));text-align:center;font-size:calc(var(--u)*3.4);letter-spacing:.3em;color:var(--tan-dim)}
+
+.card{position:absolute;left:calc(var(--u)*8);right:calc(var(--u)*8);top:calc(24% + var(--top));height:calc(var(--u)*92);perspective:calc(var(--u)*260)}
+.card .in{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(180deg) rotate(3deg);transition:transform .8s cubic-bezier(.3,.9,.3,1)}
+.app[data-step=reveal] .card .in{transform:rotateY(0) rotate(-2deg);transition-delay:.15s}
+.face{position:absolute;inset:0;border-radius:calc(var(--u)*5);-webkit-backface-visibility:hidden;backface-visibility:hidden;
+  border:1px solid var(--amber);background:linear-gradient(160deg,#33210f,#170e07);box-shadow:0 calc(var(--u)*4) calc(var(--u)*12) rgba(0,0,0,.6)}
+.card.dare .face{border-color:var(--red);background:linear-gradient(160deg,#351710,#170b07)}
+.face.back{transform:rotateY(180deg)}
+.face.front{display:flex;flex-direction:column;padding:calc(var(--u)*7)}
+.face.front::before{content:"";position:absolute;inset:calc(var(--u)*2.2);border:1px solid var(--tan-faint);border-radius:calc(var(--u)*3.2);pointer-events:none}
+.tag{font-family:var(--display);font-weight:700;font-size:calc(var(--u)*11);line-height:1;color:var(--amber);margin:calc(var(--u)*-13) 0 0 calc(var(--u)*-3);
+  text-shadow:0 calc(var(--u)*.8) calc(var(--u)*3) rgba(16,10,6,.8)}  /* 标签探出牌的上沿 */
+.card.dare .tag{color:var(--red)}
+.q{flex:1;display:flex;align-items:center;font-size:calc(var(--u)*6.4);font-weight:600;line-height:1.55;letter-spacing:.04em;color:var(--cream);overflow-wrap:anywhere}
+.q.long{font-size:calc(var(--u)*5.2)}
+.src{font-size:calc(var(--u)*3);letter-spacing:.2em;color:var(--tan-dim)}
+.verdict{position:absolute;left:calc(var(--u)*8);right:calc(var(--u)*8);bottom:calc(var(--u)*9 + var(--bot));display:flex;gap:calc(var(--u)*3)}
+.verdict .btn{flex:1;padding:0;font-size:calc(var(--u)*4);letter-spacing:.14em;text-indent:.14em}
+
+.toast{position:absolute;left:50%;bottom:calc(var(--u)*32 + var(--bot));z-index:70;transform:translateX(-50%);max-width:80%;padding:calc(var(--u)*2.6) calc(var(--u)*5);
+  border-radius:calc(var(--u)*6);border:1px solid var(--tan-faint);background:rgba(0,0,0,.82);font-size:calc(var(--u)*3.5);letter-spacing:.08em;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.show{opacity:1}
+
+@media (prefers-reduced-motion:reduce){
+  .bottle{transition-duration:.6s}
+  .card .in,.view{transition-duration:.01s}
+}
+
+/* ---------- 底色与居中排版（封面和内页共用） ---------- */
+.app{background:linear-gradient(180deg,#0f0a06 0%,#1a110a 55%,#22150b 100%)}
+.bgfx{position:absolute;inset:0;transition:opacity .6s ease}
+.app:not([data-view=cover]) .bgfx{opacity:.6}
+.brand{left:0;right:0;text-align:center;text-indent:.5em}
+.badge{right:calc(var(--u)*2);top:calc(var(--u)*13 + var(--top));width:calc(var(--u)*17);height:calc(var(--u)*17)}
+.cover-title{left:0;right:0;text-align:center}
+.cover-title span+span{margin:calc(var(--u)*1.5) 0 0}
+.form .eyebrow,.form h2,.form .lead,.rules .eyebrow,.rules h2{text-align:center}
+.eyebrow{text-indent:.42em}
+.form{background:none}
+.turn{left:calc(var(--u)*6);right:calc(var(--u)*6);text-align:center}
+.turn b{margin-left:0}
+.cover-title{font-size:calc(var(--u)*22)}
+.tag{margin:calc(var(--u)*-13) 0 0;text-align:center}
+.q{justify-content:center;text-align:center}
+.src{text-align:center}
+</style>
+</head>
+<body>
+<main class="app" id="app" data-view="cover" data-step="idle">
+  <div class="bgfx" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+
+  <!-- 封面 -->
+  <section class="view v-cover">
+    <div class="shade"></div>
+    <p class="brand">大冰的小屋 · 桌边游戏</p>
+    <svg class="badge" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="ring-path" d="M50 50m-39 0a39 39 0 1 1 78 0a39 39 0 1 1-78 0"/></defs><text><textPath href="#ring-path" textLength="240" lengthAdjust="spacing">TRUTH OR DARE · 转到谁算谁 · 不许耍赖 ·</textPath></text><circle cx="50" cy="50" r="9"/></svg>
+    <h1 class="cover-title" aria-label="真心话大冒险"><span>真心话</span><span>大冒险</span></h1>
+    <div class="art" aria-hidden="true">
+      <div class="c c1"><em>TRUTH</em><strong>？</strong><b>真心话</b></div>
+      <svg class="btl" viewBox="0 0 60 184"><defs><linearGradient id="cg" x1="0" x2="1"><stop offset="0" stop-color="#8a4f1f"/><stop offset=".45" stop-color="#e0934a"/><stop offset="1" stop-color="#6b3a15"/></linearGradient></defs>
+        <path d="M24 4h12v8l-2 4v34c0 12 16 16 16 36v82c0 7-5 12-12 12H22c-7 0-12-5-12-12V86c0-20 16-24 16-36V16l-2-4Z" fill="url(#cg)" stroke="#e6cfa6" stroke-width="1.5" stroke-linejoin="round"/>
+        <rect x="15" y="104" width="30" height="40" rx="3" fill="#1a0f06"/><path d="M17 92v8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".7"/></svg>
+      <div class="c c2"><em>DARE</em><strong>！</strong><b>大冒险</b></div>
+    </div>
+    <svg class="spark" style="left:calc(var(--u)*7);top:calc(var(--u)*62 + var(--top));width:calc(var(--u)*7);height:calc(var(--u)*7)" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12Z"/></svg><svg class="spark" style="left:calc(var(--u)*6);top:calc(var(--u)*150 + var(--top));width:calc(var(--u)*5);height:calc(var(--u)*5)" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12Z"/></svg><svg class="spark" style="left:calc(var(--u)*88);top:calc(var(--u)*128 + var(--top));width:calc(var(--u)*4);height:calc(var(--u)*4)" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12Z"/></svg>
+    <div class="cover-foot">
+      <p>一部手机放桌上，围一圈就能玩。</p>
+      <button class="btn" id="goSeats">开一局</button>
+      <button class="link" id="goWriteFromCover">先出几道题</button>
+    </div>
+  </section>
+
+  <!-- 入座 -->
+  <section class="view v-seats form">
+    <p class="eyebrow">第一步</p>
+    <h2>入座</h2>
+    <p class="lead">按座位顺序写下每个人的名字，2 到 10 人。</p>
+    <div class="field">
+      <input id="nameInput" type="text" maxlength="6" placeholder="名字，最多 6 个字" autocomplete="off" enterkeyhint="done">
+      <button class="btn" id="addName">加入</button>
+    </div>
+    <div class="scroll" id="seatList"></div>
+    <div class="actions">
+      <button class="btn" id="seatsDone" disabled>坐好了</button>
+      <button class="link" id="seatsToWrite">去出题</button>
+    </div>
+  </section>
+
+  <!-- 出题 -->
+  <section class="view v-write form">
+    <p class="eyebrow">大家一起写</p>
+    <h2>出题</h2>
+    <p class="lead">写完把手机传给下一个人。题目提交后就封存，抽中才揭晓。</p>
+    <div class="seg" id="seg">
+      <button data-type="truth" class="on">真心话</button>
+      <button data-type="dare">大冒险</button>
+    </div>
+    <div class="field">
+      <input id="qInput" type="text" maxlength="60" placeholder="写一道题，最多 60 字" autocomplete="off" enterkeyhint="send">
+      <button class="btn" id="addQ">封存</button>
+    </div>
+    <div class="scroll">
+      <div class="tally">
+        <div><b id="nTruth">0</b><span>道真心话待抽</span></div>
+        <div><b id="nDare">0</b><span>道大冒险待抽</span></div>
+      </div>
+      <label class="check"><input type="checkbox" id="usePresets">同时混入店家准备的题</label>
+      <button class="link" id="clearQ" style="padding-left:0">清空大家写的题</button>
+    </div>
+    <div class="actions">
+      <button class="btn" id="writeDone">写好了</button>
+    </div>
+  </section>
+
+  <!-- 游戏 -->
+  <section class="view v-play">
+    <div class="bar">
+      <p class="round" id="round"></p>
+      <div><button class="link" id="toSeats">换人</button><button class="link" id="toWrite">出题</button></div>
+    </div>
+    <div class="ring" id="ring">
+      <div class="bottle" id="bottle">
+        <svg viewBox="0 0 60 184" aria-hidden="true">
+          <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#8a4f1f"/><stop offset=".45" stop-color="#e0934a"/><stop offset="1" stop-color="#6b3a15"/></linearGradient></defs>
+          <path d="M24 4h12v8l-2 4v34c0 12 16 16 16 36v82c0 7-5 12-12 12H22c-7 0-12-5-12-12V86c0-20 16-24 16-36V16l-2-4Z" fill="url(#g)" stroke="#e6cfa6" stroke-width="1.5" stroke-linejoin="round"/>
+          <rect x="15" y="104" width="30" height="40" rx="3" fill="#1a0f06"/>
+          <path d="M17 92v58" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".25"/>
+        </svg>
+      </div>
+    </div>
+    <p class="prompt" id="prompt">转一下瓶子，看看轮到谁</p>
+    <button class="btn spin" id="spin">转瓶子</button>
+    <p class="note">不想答、不想做都可以跳过，也可以用无酒精饮料代替</p>
+
+    <!-- 选牌 -->
+    <div class="layer l-choose">
+      <p class="turn"><em>轮到</em><b id="turnA"></b></p>
+      <div class="pick">
+        <button class="t" data-type="truth"><strong>真心话</strong><span>说句实话</span></button>
+        <button class="d" data-type="dare"><strong>大冒险</strong><span>做件小事</span></button>
+      </div>
+      <p class="hintline">选一张</p>
+    </div>
+
+    <!-- 揭晓 -->
+    <div class="layer l-reveal">
+      <p class="turn"><em>轮到</em><b id="turnB"></b></p>
+      <div class="card" id="card">
+        <div class="in">
+          <div class="face back"></div>
+          <div class="face front">
+            <p class="tag" id="tag"></p>
+            <p class="q" id="q"></p>
+            <p class="src" id="src"></p>
+          </div>
+        </div>
+      </div>
+      <div class="verdict">
+        <button class="btn" id="done">完成了</button>
+        <button class="btn ghost" id="skip">喝一口跳过</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+</main>
+
+<script>
+/* ============ 店家预设题：可以直接在这里增删 ============ */
+var PRESETS = {
+  truth: [
+    '你手机里最近一次搜索的内容是什么？',
+    '在座的人里，你最想和谁互换一天人生？',
+    '你做过最冲动的一次消费是什么？',
+    '你最近一次说谎是为了什么？',
+    '说一个你一直没改掉的小毛病。',
+    '你上一次哭是因为什么？',
+    '你最想删掉的一条朋友圈是什么内容？',
+    '你对在座某个人的第一印象是什么？',
+    '你最怕别人知道的一个爱好是什么？',
+    '如果明天不用上班，你最想做什么？',
+    '你收到过最奇怪的礼物是什么？',
+    '说一件你小时候干过的糗事。',
+    '你最近一次熬夜是在干什么？',
+    '你觉得自己最被低估的优点是什么？',
+    '有没有一首歌，一听就会想起某个人？'
+  ],
+  dare: [
+    '用方言向全桌做一次自我介绍。',
+    '模仿在座的一个人，让大家猜是谁。',
+    '和左手边的人碰杯，并说一句夸奖。',
+    '用播音腔念出酒单上的三款酒。',
+    '闭眼原地转三圈，然后走直线回到座位。',
+    '给通讯录里第五个人发一句“在吗”，把回复念出来。',
+    '保持一个搞怪表情，直到下一题被抽出。',
+    '唱一句你最近单曲循环的歌。',
+    '用三个词形容右手边的人。',
+    '向全桌表演十秒钟的无实物表演。',
+    '把你的手机壁纸给大家看。',
+    '下一轮开始前，每句话都要以“报告”开头。',
+    '用最深情的语气读一遍桌上的小食名字。',
+    '和对面的人对视十秒，先笑的人喝一口。',
+    '给大家讲一个冷笑话，没人笑就自己喝一口。'
+  ]
+};
+/* ====================================================== */
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var app = $('app');
+  var TYPE = { truth: '真心话', dare: '大冒险' };
+  var KEY = 'xiaowu.tod.v1';
+
+  /* ---------- 存档（存不了也能照常玩） ---------- */
+  var S = { players: [], custom: [], usedPresets: { truth: [], dare: [] }, usePresets: true, stats: {}, round: 0 };
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved && saved.players) for (var k in S) if (saved[k] != null) S[k] = saved[k];
+  } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+  var rot = 0, last = -1, busy = false, current = null, addType = 'truth', started = false;
+
+  /* ---------- 小工具 ---------- */
+  var toastTimer;
+  function toast(msg) {
+    var t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2000);
+  }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  function rand(n) { return Math.floor(Math.random() * n); }
+  function clean(s, max) { return String(s).replace(/\s+/g, ' ').trim().slice(0, max); }
+  function show(view) { app.setAttribute('data-view', view); if (document.activeElement) document.activeElement.blur(); }
+  function step(s) { app.setAttribute('data-step', s); }
+
+  /* ---------- 入座 ---------- */
+  function renderSeats() {
+    var box = $('seatList'); box.textContent = '';
+    if (!S.players.length) box.appendChild(el('p', 'empty', '还没有人入座。'));
+    S.players.forEach(function (name, i) {
+      var row = el('div', 'seat');
+      row.appendChild(el('span', 'no', String(i + 1)));
+      row.appendChild(el('span', 'nm', name));
+      var st = S.stats[name];
+      if (st && (st.done || st.skip)) row.appendChild(el('span', 'st', '完成 ' + st.done + ' · 跳过 ' + st.skip));
+      var x = el('button', 'x', '×'); x.setAttribute('aria-label', '移除 ' + name);
+      x.onclick = function () { S.players.splice(i, 1); last = -1; save(); renderSeats(); };
+      row.appendChild(x);
+      box.appendChild(row);
+    });
+    $('seatsDone').disabled = S.players.length < 2;
+    $('seatsDone').textContent = S.players.length < 2 ? '至少 2 个人' : (started ? '回到游戏' : '坐好了');
+  }
+  function addName() {
+    var name = clean($('nameInput').value, 6);
+    if (!name) return toast('先写个名字');
+    if (S.players.indexOf(name) > -1) return toast('已经有同名的人了');
+    if (S.players.length >= 10) return toast('最多 10 个人');
+    S.players.push(name); $('nameInput').value = ''; save(); renderSeats();
+  }
+  $('addName').onclick = addName;
+  $('nameInput').onkeydown = function (e) { if (e.key === 'Enter' && !e.isComposing) addName(); };
+  $('seatsDone').onclick = function () { enterPlay(); };
+  $('seatsToWrite').onclick = function () { openWrite('seats'); };
+
+  /* ---------- 出题 ---------- */
+  var writeBack = 'cover';
+  function left(type) {
+    var n = S.custom.filter(function (q) { return q.type === type && !q.used; }).length;
+    if (S.usePresets) n += PRESETS[type].length - S.usedPresets[type].length;
+    return n;
+  }
+  function renderWrite() {
+    $('nTruth').textContent = left('truth'); $('nDare').textContent = left('dare');
+    $('usePresets').checked = S.usePresets;
+    $('writeDone').textContent = writeBack === 'play' ? '回到游戏' : (writeBack === 'seats' ? '写好了，回去入座' : '写好了，去入座');
+  }
+  function openWrite(from) { writeBack = from; renderWrite(); show('write'); }
+  function addQ() {
+    var text = clean($('qInput').value, 60);
+    if (!text) return toast('先写点什么');
+    if (S.custom.some(function (q) { return q.type === addType && q.text === text; })) return toast('这道题已经有人写过了');
+    if (S.custom.length >= 200) return toast('题库满了');
+    S.custom.push({ type: addType, text: text, used: false });
+    $('qInput').value = ''; save(); renderWrite(); toast('已封存，传给下一个人');
+  }
+  $('addQ').onclick = addQ;
+  $('qInput').onkeydown = function (e) { if (e.key === 'Enter' && !e.isComposing) addQ(); };
+  $('seg').onclick = function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    addType = b.getAttribute('data-type');
+    [].forEach.call(this.children, function (x) { x.classList.toggle('on', x === b); });
+  };
+  $('usePresets').onchange = function () { S.usePresets = this.checked; save(); renderWrite(); };
+  $('clearQ').onclick = function () {
+    if (!S.custom.length) return toast('还没有人写题');
+    if (window.confirm('清空大家写的 ' + S.custom.length + ' 道题？')) { S.custom = []; save(); renderWrite(); }
+  };
+  $('writeDone').onclick = function () {
+    if (writeBack === 'play') return show('play');
+    renderSeats(); show('seats');
+  };
+
+  /* ---------- 游戏 ---------- */
+  function renderRing() {
+    var ring = $('ring');
+    [].slice.call(ring.querySelectorAll('.who')).forEach(function (n) { ring.removeChild(n); });
+    var n = S.players.length;
+    S.players.forEach(function (name, i) {
+      var a = i / n * Math.PI * 2;                     // 0 在正上方，顺时针排座
+      var w = el('span', 'who', name);
+      w.style.left = (50 + 44 * Math.sin(a)) + '%';
+      w.style.top = (50 - 44 * Math.cos(a)) + '%';
+      ring.appendChild(w);
+    });
+  }
+  function renderRound() {
+    var r = $('round'); r.textContent = '第' + (S.round + 1) + '轮';
+    r.appendChild(el('small', null, S.players.length + ' 人'));
+  }
+  function enterPlay() {
+    started = true; last = -1; current = null;
+    renderRing(); renderRound(); step('idle');
+    $('prompt').textContent = '转一下瓶子，看看轮到谁';
+    show('play');
+  }
+  $('toSeats').onclick = function () { if (!busy) { renderSeats(); show('seats'); } };
+  $('toWrite').onclick = function () { if (!busy) openWrite('play'); };
+
+  function spin() {
+    if (busy) return;
+    var n = S.players.length; if (n < 2) return;
+    busy = true;
+    var idx; do { idx = rand(n); } while (idx === last);
+    last = idx;
+    var whos = $('ring').querySelectorAll('.who');
+    [].forEach.call(whos, function (w) { w.classList.remove('on'); });
+    $('prompt').textContent = '……';
+    var target = idx / n * 360, cur = ((rot % 360) + 360) % 360;
+    rot += 360 * (4 + rand(2)) + ((target - cur + 360) % 360);
+    $('bottle').style.transform = 'rotate(' + rot + 'deg)';
+    var reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    setTimeout(function () {
+      whos[idx].classList.add('on');
+      var name = S.players[idx];
+      $('prompt').textContent = '轮到 ' + name;
+      $('turnA').textContent = name; $('turnB').textContent = name;
+      current = { player: name };
+      setTimeout(function () { step('choose'); busy = false; }, 900);
+    }, reduce ? 700 : 3500);
+  }
+  $('spin').onclick = spin;
+  $('bottle').onclick = spin;
+
+  /* 抽题：先抽大家写的，再抽店家预设；一类题抽空了就自动重新洗牌 */
+  function draw(type) {
+    var mine = S.custom.filter(function (q) { return q.type === type && !q.used; });
+    var pre = S.usePresets ? PRESETS[type].map(function (_, i) { return i; }).filter(function (i) { return S.usedPresets[type].indexOf(i) < 0; }) : [];
+    if (!mine.length && !pre.length) {
+      var any = S.custom.some(function (q) { return q.type === type; }) || S.usePresets;
+      if (!any) return null;
+      S.custom.forEach(function (q) { if (q.type === type) q.used = false; });
+      S.usedPresets[type] = [];
+      toast(TYPE[type] + '抽完一轮，已重新洗牌');
+      return draw(type);
+    }
+    // 大家写的题优先：有自拟题时七成概率抽它
+    if (mine.length && (!pre.length || Math.random() < .7)) {
+      var q = mine[rand(mine.length)]; q.used = true;
+      return { text: q.text, src: '桌上有人写的' };
+    }
+    var i = pre[rand(pre.length)]; S.usedPresets[type].push(i);
+    return { text: PRESETS[type][i], src: '小屋准备的' };
+  }
+  [].forEach.call(document.querySelectorAll('.pick button'), function (b) {
+    b.onclick = function () {
+      if (!current || busy) return;
+      var type = b.getAttribute('data-type'), card = draw(type);
+      if (!card) return toast('还没有' + TYPE[type] + '的题，先去出几道');
+      current.type = type; save();
+      $('card').className = 'card ' + type;
+      $('tag').textContent = TYPE[type];
+      $('q').textContent = card.text;
+      $('q').classList.toggle('long', card.text.length > 28);
+      $('src').textContent = card.src;
+      step('reveal');
+    };
+  });
+  function finish(outcome) {
+    if (!current) return;
+    var st = S.stats[current.player] || (S.stats[current.player] = { done: 0, skip: 0 });
+    st[outcome]++; S.round++; current = null; save();
+    renderRound(); step('idle');
+    $('prompt').textContent = outcome === 'skip' ? '喝一口，下一位' : '漂亮，下一位';
+  }
+  $('done').onclick = function () { finish('done'); };
+  $('skip').onclick = function () { finish('skip'); };
+
+  /* ---------- 封面 ---------- */
+  $('goSeats').onclick = function () { renderSeats(); show('seats'); };
+  $('goWriteFromCover').onclick = function () { openWrite('cover'); };
+
+  /* 预览某一屏：?demo=seats | write | play | choose | reveal */
+  var demo = new URLSearchParams(location.search).get('demo');
+  if (demo) {
+    S.players = ['阿杰', '小林', '大鹏', '晓雯', '老周', '可乐'];
+    renderSeats(); renderWrite();
+    if (demo === 'seats' || demo === 'write') show(demo);
+    else {
+      enterPlay();
+      if (demo !== 'play') {
+        current = { player: '晓雯', type: 'dare' };
+        $('ring').querySelectorAll('.who')[3].classList.add('on');
+        $('bottle').style.transition = 'none'; $('bottle').style.transform = 'rotate(180deg)';
+        $('turnA').textContent = $('turnB').textContent = '晓雯';
+        $('card').className = 'card dare'; $('tag').textContent = TYPE.dare;
+        $('q').textContent = PRESETS.dare[1]; $('src').textContent = '小屋准备的';
+        step(demo === 'reveal' ? 'reveal' : 'choose');
+      }
+    }
+    save = function () {};           // 预览不写存档
+  }
+})();
+</script>
+</body>
+</html>

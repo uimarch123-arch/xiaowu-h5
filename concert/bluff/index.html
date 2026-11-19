@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#120c07">
+<title>谁在吹牛｜大冰的小屋</title>
+<style>
+/* 标题字：阿里妈妈数黑体（只含本页固定标题用字；其余文字用系统黑体） */
+@font-face{font-family:"Alimama ShuHeiTi";font-weight:700;font-display:swap;
+  src:url("../assets/fonts/AlimamaShuHeiTi-Bold.bluff.woff2") format("woff2");
+  unicode-range:U+30-39,U+4E00,U+4E48,U+4E86,U+4ED6,U+5165,U+5168,U+51FA,U+5230,U+5409,U+5439,U+5728,U+5B89,U+5C0F,U+5C40,U+5C4B,U+5EA7,U+5F20,U+600E,U+676F,U+684C,U+706F,U+724C,U+725B,U+73A9,U+7591,U+771F,U+7B2C,U+7B3C,U+7FFB,U+8BDD,U+8C01,U+8D28,U+8D62,U+8F6E,U+9152,U+9B3C,U+9B54,U+FF01,U+FF1F}
+:root{
+  --bg:#120c07; --ink:#1a0f06;
+  --tan:#cdb187; --tan-dim:rgba(205,177,135,.6); --tan-faint:rgba(205,177,135,.22);
+  --cream:#e6cfa6; --amber:#e0934a; --red:#e5513a; --acid:#e6cfa6;
+  --sans:"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Source Han Sans SC","Microsoft YaHei",sans-serif;
+  --display:"Alimama ShuHeiTi","PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Microsoft YaHei",sans-serif;
+  --u:min(1vw,.5vh,5px);
+  --top:env(safe-area-inset-top); --bot:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#000;overflow:hidden;overscroll-behavior:none}
+body{font-family:var(--sans);font-weight:500;color:var(--cream);-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none}
+button,input{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+svg.ic{display:block;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+.app{position:fixed;left:50%;top:0;width:calc(var(--u)*100);height:100%;transform:translateX(-50%);overflow:hidden;background:var(--bg)}
+.app::after{content:"";position:absolute;inset:0;z-index:60;pointer-events:none;opacity:.1;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ---------- 换屏 ---------- */
+.view,.step{position:absolute;inset:0;overflow:hidden;opacity:0;visibility:hidden;transform:translateY(4%);
+  transition:opacity .4s ease,transform .55s cubic-bezier(.2,.7,.2,1),visibility 0s .55s}
+.app[data-view=cover] .v-cover,.app[data-view=seats] .v-seats,.app[data-view=game] .v-game,
+.app[data-step=handoff] .s-handoff,.app[data-step=turn] .s-turn,.app[data-step=reveal] .s-reveal,.app[data-step=penalty] .s-penalty,.app[data-step=win] .s-win{
+  opacity:1;visibility:visible;transform:none;transition-delay:0s}
+
+/* ---------- 按钮 ---------- */
+.btn{display:flex;align-items:center;justify-content:center;height:calc(var(--u)*13.5);padding:0 calc(var(--u)*6);border-radius:calc(var(--u)*7);
+  font-size:calc(var(--u)*4.3);font-weight:600;letter-spacing:.2em;text-indent:.2em;background:var(--cream);color:var(--ink);white-space:nowrap;
+  box-shadow:0 calc(var(--u)*1.5) calc(var(--u)*6) rgba(0,0,0,.45);transition:transform .15s,opacity .3s}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.35;pointer-events:none}
+.btn.ghost{background:rgba(16,10,6,.55);color:var(--cream);border:1px solid var(--tan-dim);font-weight:500;box-shadow:none}
+.btn.red{background:var(--red);color:#fff}
+.link{font-size:calc(var(--u)*3.5);letter-spacing:.14em;color:var(--tan);padding:calc(var(--u)*2.5) calc(var(--u)*3)}
+.link:active{opacity:.6}
+.foot{position:absolute;left:calc(var(--u)*8);right:calc(var(--u)*8);bottom:calc(var(--u)*8 + var(--bot));display:flex;gap:calc(var(--u)*3)}
+.foot .btn{flex:1;min-width:0}
+.foot.col{flex-direction:column;align-items:center;gap:calc(var(--u)*1)}
+.foot.col .btn{width:100%;flex:none}
+
+/* ---------- 封面：图形海报，不用照片 ---------- */
+.blob{position:absolute;border-radius:50%;filter:blur(calc(var(--u)*13));pointer-events:none}
+.b1{width:calc(var(--u)*72);height:calc(var(--u)*72);right:calc(var(--u)*-18);top:36%;background:#e0934a;opacity:.4}
+.b2{width:calc(var(--u)*80);height:calc(var(--u)*80);left:calc(var(--u)*-32);top:50%;background:#b5361f;opacity:.36}
+.b3{width:calc(var(--u)*56);height:calc(var(--u)*56);left:calc(var(--u)*-22);top:calc(var(--u)*-16);background:#7a5a36;opacity:.3}
+.v-cover .shade{background:linear-gradient(180deg,rgba(0,0,0,.1) 0%,rgba(0,0,0,0) 45%,rgba(16,10,6,.92) 86%)}
+.brand{position:absolute;z-index:4;left:calc(var(--u)*8);top:calc(var(--u)*8 + var(--top));font-size:calc(var(--u)*3.3);letter-spacing:.5em;color:rgba(230,207,166,.6)}
+.badge{position:absolute;z-index:4;right:calc(var(--u)*5);top:calc(var(--u)*15 + var(--top));width:calc(var(--u)*25);height:calc(var(--u)*25);animation:turn 22s linear infinite}
+.badge text{font:700 9.2px var(--sans);letter-spacing:.06em;fill:#e6cfa6}
+.badge circle{fill:var(--amber)}
+@keyframes turn{to{transform:rotate(360deg)}}
+.cover-title{position:absolute;z-index:3;left:calc(var(--u)*7);right:calc(var(--u)*7);top:calc(var(--u)*27 + var(--top));white-space:nowrap;
+  font-family:var(--display);font-weight:700;font-size:calc(var(--u)*26);line-height:1;color:#e6cfa6;
+  text-shadow:0 calc(var(--u)*.8) calc(var(--u)*4) rgba(0,0,0,.55)}
+.cover-title span{display:block}
+.cover-title span+span{color:var(--amber)}
+.spark{position:absolute;z-index:3;fill:#e6cfa6}
+.art{position:absolute;z-index:2;left:0;right:0;top:calc(var(--u)*66 + var(--top));height:calc(var(--u)*86)}
+.cover-say{position:absolute;z-index:4;left:calc(var(--u)*8);right:calc(var(--u)*8);bottom:calc(var(--u)*40 + var(--bot));text-align:center;font-size:calc(var(--u)*3.6);letter-spacing:.14em;color:rgba(230,207,166,.86);text-shadow:0 1px calc(var(--u)*2) rgba(0,0,0,.9)}
+.v-cover .foot{z-index:4}
+.v-cover .link{color:rgba(230,207,166,.8)}
+@media (prefers-reduced-motion:reduce){.badge{animation:none}}
+.fan{position:absolute;left:50%;top:calc(var(--u)*34);width:0;height:0}
+.fan .pc{position:absolute;left:calc(var(--u)*-15);top:0;width:calc(var(--u)*30);height:calc(var(--u)*43);border-radius:calc(var(--u)*3.6);transform-origin:50% 135%;
+  border:1px solid var(--tan-dim);background:repeating-linear-gradient(45deg,#2a1b0e 0 calc(var(--u)*1.4),#1c1209 calc(var(--u)*1.4) calc(var(--u)*2.8));box-shadow:0 calc(var(--u)*3) calc(var(--u)*9) rgba(0,0,0,.55)}
+.fan .pc::before{border-color:var(--tan-faint)}
+.fan .pc:nth-child(1){transform:rotate(-30deg)} .fan .pc:nth-child(2){transform:rotate(-15deg)} .fan .pc:nth-child(3){transform:rotate(0)}
+.fan .pc:nth-child(4){transform:rotate(15deg)} .fan .pc:nth-child(5){transform:rotate(30deg)}
+.fan .pc.up{z-index:2;background:linear-gradient(155deg,#f0dcb6,#cdb187);border-color:#fff3d6;color:#b5361f;transform:rotate(-4deg) translateY(calc(var(--u)*-9))}
+.fan .pc.up svg{width:calc(var(--u)*16);height:calc(var(--u)*16);stroke-width:1.6}
+.fan .pc.up b{color:#1a0f06;font-size:calc(var(--u)*3.4)}
+.bubble{position:absolute;z-index:3;left:calc(var(--u)*5);top:calc(var(--u)*17);padding:calc(var(--u)*2.8) calc(var(--u)*5);border-radius:calc(var(--u)*6);transform:rotate(-8deg);
+  background:var(--cream);color:#1a0f06;font:600 calc(var(--u)*5)/1.1 var(--sans);letter-spacing:.06em;box-shadow:0 calc(var(--u)*2) calc(var(--u)*6) rgba(0,0,0,.4)}
+.bubble::after{content:"";position:absolute;left:calc(var(--u)*9);bottom:calc(var(--u)*-3.4);border:calc(var(--u)*2.2) solid transparent;border-top-color:var(--cream);border-bottom:0;transform:skewX(-20deg)}
+.stamp{position:absolute;z-index:3;right:calc(var(--u)*6);top:calc(var(--u)*20);width:calc(var(--u)*24);height:calc(var(--u)*24);border-radius:50%;transform:rotate(14deg);
+  border:calc(var(--u)*.9) solid var(--red);color:var(--red);display:flex;align-items:center;justify-content:center;text-align:center;font:800 calc(var(--u)*5)/1.15 var(--sans);letter-spacing:.08em;
+  background:#120c07;box-shadow:inset 0 0 0 calc(var(--u)*.7) #120c07,inset 0 0 0 calc(var(--u)*1.1) var(--red)}
+
+/* ---------- 入座 ---------- */
+.form{display:flex;flex-direction:column;padding:calc(var(--u)*9 + var(--top)) calc(var(--u)*7) calc(var(--u)*8 + var(--bot));}
+.eyebrow{font-size:calc(var(--u)*3.2);letter-spacing:.42em;color:var(--tan-dim)}
+.form h2{margin-top:calc(var(--u)*2);font-family:var(--display);font-weight:700;font-size:calc(var(--u)*17);line-height:1.05}
+.lead{margin-top:calc(var(--u)*3);font-size:calc(var(--u)*3.7);line-height:1.8;letter-spacing:.08em;color:rgba(230,207,166,.78)}
+.field{display:flex;gap:calc(var(--u)*2.5);margin-top:calc(var(--u)*6)}
+.field input{flex:1;min-width:0;height:calc(var(--u)*12.5);padding:0 calc(var(--u)*4.5);border-radius:calc(var(--u)*6.25);border:1px solid var(--tan-faint);
+  background:rgba(16,10,6,.6);font-size:calc(var(--u)*4.1);letter-spacing:.06em;outline:none;-webkit-user-select:text;user-select:text}
+.field input:focus{border-color:var(--amber)}
+.field input::placeholder{color:rgba(230,207,166,.4)}
+.field .btn{height:calc(var(--u)*12.5);font-size:calc(var(--u)*3.9);box-shadow:none}
+.scroll{flex:1;min-height:0;overflow-y:auto;margin-top:calc(var(--u)*5)}
+.actions{display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*1);padding-top:calc(var(--u)*4)}
+.actions .btn{width:100%}
+.seat{display:flex;align-items:center;gap:calc(var(--u)*3.5);padding:calc(var(--u)*3) 0;border-bottom:1px solid var(--tan-faint)}
+.seat .no{flex:none;width:calc(var(--u)*7);font-family:var(--display);font-weight:700;font-size:calc(var(--u)*6);color:var(--tan-dim)}
+.seat .nm{flex:1;min-width:0;font-size:calc(var(--u)*4.6);font-weight:600;letter-spacing:.08em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seat .x{flex:none;width:calc(var(--u)*8);height:calc(var(--u)*8);border-radius:50%;border:1px solid var(--tan-faint);color:var(--tan);font-size:calc(var(--u)*4);line-height:1}
+.empty{padding:calc(var(--u)*6) 0;font-size:calc(var(--u)*3.6);letter-spacing:.1em;color:var(--tan-dim)}
+
+/* ---------- 牌 ---------- */
+.pc{position:relative;flex:none;width:calc(var(--u)*17);height:calc(var(--u)*25);border-radius:calc(var(--u)*2.4);border:1px solid var(--tan-dim);
+  background:linear-gradient(155deg,#34230f,#170e07);color:var(--cream);box-shadow:0 calc(var(--u)*1.5) calc(var(--u)*4) rgba(0,0,0,.5);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*1.2);transition:transform .2s,border-color .2s,box-shadow .2s}
+.pc::before{content:"";position:absolute;inset:calc(var(--u)*1);border:1px solid var(--tan-faint);border-radius:calc(var(--u)*1.6);pointer-events:none}
+.pc svg{width:calc(var(--u)*9);height:calc(var(--u)*9)}
+.pc b{font-size:calc(var(--u)*3.2);font-weight:600;letter-spacing:.16em;text-indent:.16em}
+.pc[data-t=guitar]{color:#e9c58b} .pc[data-t=glass]{color:#f0a868} .pc[data-t=lantern]{color:#ef7a62}
+.pc[data-t=wild]{color:var(--ink);background:linear-gradient(155deg,#f0dcb6,#cdb187);border-color:#fff3d6}
+.pc[data-t=wild]::before{border-color:rgba(16,10,6,.25)}
+.pc.back{background:repeating-linear-gradient(45deg,#2a1b0e 0 calc(var(--u)*1.2),#1c1209 calc(var(--u)*1.2) calc(var(--u)*2.4));color:transparent}
+.pc.back svg,.pc.back b{visibility:hidden}
+.pc.big{width:calc(var(--u)*34);height:calc(var(--u)*48);border-radius:calc(var(--u)*4)}
+.pc.big svg{width:calc(var(--u)*20);height:calc(var(--u)*20)}
+.pc.big b{display:none}
+
+/* ---------- 游戏底图 ---------- */
+.bar{position:absolute;z-index:5;left:calc(var(--u)*7);right:calc(var(--u)*4);top:calc(var(--u)*6 + var(--top));display:flex;align-items:center;justify-content:space-between}
+.round{font-family:var(--display);font-weight:700;font-size:calc(var(--u)*6.4)}
+.turn{position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*7);top:calc(var(--u)*21 + var(--top))}
+.turn em{display:block;font-style:normal;font-family:var(--display);font-weight:700;font-size:calc(var(--u)*7);line-height:1;color:var(--tan-dim)}
+.turn b{display:block;margin:calc(var(--u)*.5) 0 0 calc(var(--u)*8);font-weight:600;font-size:calc(var(--u)*12);line-height:1.15;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* 交接屏 */
+.table{position:absolute;right:calc(var(--u)*8);top:calc(var(--u)*40 + var(--top));transform:rotate(6deg)}
+.table-name{position:absolute;left:calc(var(--u)*7);top:calc(var(--u)*56 + var(--top))}
+.table-name small{display:block;font-size:calc(var(--u)*3.2);letter-spacing:.4em;color:var(--tan-dim)}
+.table-name strong{display:block;margin-top:calc(var(--u)*1);font-family:var(--display);font-weight:700;font-size:calc(var(--u)*22);line-height:1;color:var(--cream);
+  text-shadow:0 calc(var(--u)*.8) calc(var(--u)*3.5) rgba(16,10,6,.8)}                 /* 桌牌名压住牌的左沿 */
+.say{position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*7);top:calc(var(--u)*97 + var(--top));font-size:calc(var(--u)*4);line-height:1.7;letter-spacing:.08em;color:var(--cream)}
+.say b{font-weight:600;color:var(--amber)}
+.roster{position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*7);top:calc(var(--u)*118 + var(--top));display:flex;flex-wrap:wrap;gap:calc(var(--u)*2)}
+.chip{display:flex;align-items:center;gap:calc(var(--u)*1.6);padding:calc(var(--u)*1.3) calc(var(--u)*3);border-radius:calc(var(--u)*5);border:1px solid var(--tan-faint);
+  background:rgba(16,10,6,.6);font-size:calc(var(--u)*3.4);letter-spacing:.06em;color:var(--tan)}
+.chip i{font-style:normal;font-size:calc(var(--u)*3);color:var(--tan-dim)}
+.chip.now{background:var(--cream);color:var(--ink);border-color:var(--cream);font-weight:600}
+.chip.now i{color:rgba(16,10,6,.6)}
+.chip.out{opacity:.4;text-decoration:line-through}
+.pads{position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*7);bottom:calc(var(--u)*27 + var(--bot));font-size:calc(var(--u)*3.1);letter-spacing:.14em;color:var(--tan-dim)}
+
+/* 出牌屏 */
+.s-turn .say{top:calc(var(--u)*46 + var(--top))}
+.hand{position:absolute;left:0;right:0;top:calc(var(--u)*72 + var(--top));display:flex;justify-content:center;padding:0 calc(var(--u)*4)}
+.hand .pc{margin:0 calc(var(--u)*-.6);cursor:pointer}
+.hand .pc:nth-child(odd){transform:rotate(-3deg)} .hand .pc:nth-child(even){transform:rotate(2.5deg) translateY(calc(var(--u)*1.5))}
+.hand .pc.sel{transform:translateY(calc(var(--u)*-6));border-color:var(--amber);box-shadow:0 0 calc(var(--u)*5) rgba(224,147,74,.7);z-index:2}
+.tip{position:absolute;left:0;right:0;top:calc(var(--u)*106 + var(--top));text-align:center;font-size:calc(var(--u)*3.2);letter-spacing:.14em;color:var(--tan-dim)}
+.hide{position:absolute;left:0;right:0;bottom:calc(var(--u)*23 + var(--bot));text-align:center}
+
+/* 开牌屏 */
+.verdict{position:absolute;left:calc(var(--u)*7);top:calc(var(--u)*20 + var(--top));font-family:var(--display);font-weight:700;font-size:calc(var(--u)*27);line-height:1;color:var(--red);
+  text-shadow:0 calc(var(--u)*.8) calc(var(--u)*3.5) rgba(16,10,6,.8)}
+.verdict.honest{color:var(--cream)}
+.shown{position:absolute;left:0;right:0;top:calc(var(--u)*44 + var(--top));display:flex;justify-content:center;gap:calc(var(--u)*2.5)}
+.shown .pc{width:calc(var(--u)*24);height:calc(var(--u)*35)}
+.shown .pc svg{width:calc(var(--u)*13);height:calc(var(--u)*13)}
+.shown .pc:nth-child(1){transform:rotate(-5deg)} .shown .pc:nth-child(2){transform:translateY(calc(var(--u)*-2))} .shown .pc:nth-child(3){transform:rotate(5deg)}
+.shown .pc.bad{border-color:var(--red);box-shadow:0 0 calc(var(--u)*5) rgba(229,81,58,.6)}
+.s-reveal .say{top:calc(var(--u)*88 + var(--top))}
+
+/* 杯垫屏 */
+.s-penalty .turn em{font-size:calc(var(--u)*13);color:var(--cream)}
+.s-penalty .turn b{font-size:calc(var(--u)*7);margin-left:calc(var(--u)*1);color:var(--tan)}
+.coasters{position:absolute;left:calc(var(--u)*9);right:calc(var(--u)*9);top:calc(var(--u)*52 + var(--top));display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*4)}
+.pad{aspect-ratio:1;border-radius:50%;border:1px solid var(--tan-dim);background:radial-gradient(circle at 35% 30%,#3a2814,#1a1009 70%);
+  box-shadow:0 calc(var(--u)*1.5) calc(var(--u)*4) rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:700;font-size:calc(var(--u)*6);color:transparent;transition:transform .5s,background .4s,opacity .4s}
+.pad:nth-child(odd){transform:rotate(-4deg)} .pad:nth-child(3n){transform:translateY(calc(var(--u)*2))}
+.pad::after{content:"";position:absolute}
+.pad.open{background:rgba(16,10,6,.5);border-style:dashed;border-color:var(--tan-faint);color:var(--tan-dim);box-shadow:none;pointer-events:none}
+.pad.devil{background:var(--red);border-color:#ffb3a3;color:#fff;transform:scale(1.12) rotate(-6deg);box-shadow:0 0 calc(var(--u)*8) rgba(229,81,58,.7)}
+.pad.fresh{background:var(--cream);border-color:#fff;color:var(--ink);transform:scale(1.08)}
+.s-penalty .say{top:calc(var(--u)*118 + var(--top));text-align:center}
+
+/* 结果屏 */
+.win-title{position:absolute;left:calc(var(--u)*7);top:calc(20% + var(--top));font-family:var(--display);font-weight:700;font-size:calc(var(--u)*30);line-height:1;color:var(--cream);
+  text-shadow:0 calc(var(--u)*.8) calc(var(--u)*3.5) rgba(16,10,6,.65),0 0 calc(var(--u)*9) rgba(224,147,74,.3)}
+.win-name{position:absolute;left:calc(var(--u)*9);right:calc(var(--u)*7);top:calc(20% + var(--u)*34 + var(--top));font-size:calc(var(--u)*9);font-weight:600;letter-spacing:.06em;color:var(--amber);
+  text-shadow:0 1px calc(var(--u)*3) rgba(16,10,6,.9)}
+
+/* 规则 */
+.rules{position:absolute;inset:0;z-index:40;padding:calc(var(--u)*9 + var(--top)) calc(var(--u)*7) calc(var(--u)*8 + var(--bot));display:flex;flex-direction:column;
+  background:rgba(16,10,6,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
+.rules.on{opacity:1;visibility:visible;transition-delay:0s}
+.rules h2{font-family:var(--display);font-weight:700;font-size:calc(var(--u)*15);line-height:1.05}
+.rules ol{flex:1;min-height:0;overflow-y:auto;margin-top:calc(var(--u)*5);padding-left:calc(var(--u)*5.5);font-size:calc(var(--u)*3.8);line-height:1.75;letter-spacing:.05em;color:rgba(230,207,166,.88)}
+.rules li{padding:calc(var(--u)*1.6) 0 calc(var(--u)*1.6) calc(var(--u)*1)}
+.rules li::marker{font-family:var(--display);color:var(--amber)}
+.rules .btn{flex:none;margin-top:calc(var(--u)*4)}
+
+.toast{position:absolute;left:50%;bottom:calc(var(--u)*32 + var(--bot));z-index:70;transform:translateX(-50%);max-width:80%;padding:calc(var(--u)*2.6) calc(var(--u)*5);
+  border-radius:calc(var(--u)*6);border:1px solid var(--tan-faint);background:rgba(0,0,0,.85);font-size:calc(var(--u)*3.5);letter-spacing:.08em;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.view,.step,.pad,.pc{transition-duration:.01s}}
+
+/* ---------- 底色与居中排版（封面和内页共用） ---------- */
+.app{background:linear-gradient(180deg,#0f0a06 0%,#1a110a 55%,#22150b 100%)}
+.bgfx{position:absolute;inset:0;transition:opacity .6s ease}
+.app:not([data-view=cover]) .bgfx{opacity:.6}
+.brand{left:0;right:0;text-align:center;text-indent:.5em}
+.badge{right:calc(var(--u)*2);top:calc(var(--u)*13 + var(--top));width:calc(var(--u)*17);height:calc(var(--u)*17)}
+.cover-title{left:0;right:0;text-align:center}
+.cover-title span+span{margin:calc(var(--u)*1.5) 0 0}
+.form .eyebrow,.form h2,.form .lead,.rules .eyebrow,.rules h2{text-align:center}
+.eyebrow{text-indent:.42em}
+.form{background:none}
+.turn{left:calc(var(--u)*6);right:calc(var(--u)*6);text-align:center}
+.turn b{margin-left:0}
+.cover-title{font-size:calc(var(--u)*28)}
+.bubble{top:calc(var(--u)*22)}
+.app[data-step=win] .bgfx{opacity:1}
+.say{text-align:center}
+/* 交接屏：桌牌居中，牌名压在牌的下沿 */
+.table{left:50%;right:auto;margin-left:calc(var(--u)*-17);top:calc(var(--u)*50 + var(--top));transform:rotate(5deg)}
+.table-name{left:0;right:0;text-align:center;top:calc(var(--u)*84 + var(--top))}
+.table-name small{text-indent:.4em}
+.table-name strong{font-size:calc(var(--u)*20)}
+.s-handoff .say{top:calc(var(--u)*119 + var(--top))}
+.s-handoff .pads{bottom:calc(var(--u)*25 + var(--bot))}
+.roster{top:calc(var(--u)*140 + var(--top));justify-content:center}
+.pads{text-align:center}
+.shown{top:calc(var(--u)*50 + var(--top))}
+.s-reveal .say{top:calc(var(--u)*94 + var(--top))}
+.verdict{left:0;right:0;text-align:center}
+.s-penalty .turn b{margin-left:0}
+.win-title{left:0;right:0;text-align:center}
+.win-name{left:calc(var(--u)*7);text-align:center}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-guitar" viewBox="0 0 24 24"><g transform="rotate(35 12 12)"><path d="M12 11.500c-2.300 0-3.400 1.400-3.100 2.900.200.900-.100 1.400-.800 2.300-1.200 1.700-.300 4.300 3.900 4.300s5.100-2.600 3.900-4.300c-.700-.900-1-1.400-.800-2.300.300-1.500-.800-2.900-3.100-2.900Z"/><circle cx="12" cy="15.500" r="1.300"/><path d="M11.300 11.500V4.500h1.400v7M11 4.500l-.300-2.500h2.600l-.300 2.500"/></g></symbol>
+  <symbol id="i-glass" viewBox="0 0 24 24"><path d="M5 5h14l-7 8.500Z"/><path d="M7 7.500h10M12 13.500V20M8 20.500h8"/><circle cx="17.500" cy="4.500" r="2"/></symbol>
+  <symbol id="i-lantern" viewBox="0 0 24 24"><path d="M9 5h6M9 19h6M12 2.500V5M12 19v2.500"/><path d="M9 5C6.500 6.500 5.500 9 5.500 12s1 5.500 3.500 7h6c2.500-1.500 3.500-4 3.500-7S17.500 6.500 15 5Z"/><path d="M12 5v14M9 5.500c-.800 2-1.200 4-1.200 6.500s.400 4.500 1.200 6.500M15 5.500c.800 2 1.200 4 1.200 6.500s-.400 4.500-1.200 6.500" opacity=".6"/></symbol>
+  <symbol id="i-wild" viewBox="0 0 24 24"><path d="M3 11.500C5 6.500 8 4 12 4s7 2.500 9 7.500"/><path d="M5 10.500V21M19 10.500V21M3.500 21h17"/><path d="M9 21v-7h6v7M12 14v7"/><path d="M8.500 11.500h7"/></symbol>
+</svg>
+
+<main class="app" id="app" data-view="cover" data-step="">
+  <div class="bgfx" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+
+  <!-- 封面 -->
+  <section class="view v-cover">
+    <div class="shade"></div>
+    <p class="brand">大冰的小屋 · 桌边游戏</p>
+    <svg class="badge" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="ring-path" d="M50 50m-39 0a39 39 0 1 1 78 0a39 39 0 1 1-78 0"/></defs><text><textPath href="#ring-path" textLength="240" lengthAdjust="spacing">嘴上说的 · 和手里出的 · 不一定是一回事 ·</textPath></text><circle cx="50" cy="50" r="9"/></svg>
+    <h1 class="cover-title" aria-label="谁在吹牛"><span>谁在</span><span>吹牛</span></h1>
+    <div class="art" aria-hidden="true">
+      <div class="fan">
+        <div class="pc"></div><div class="pc"></div>
+        <div class="pc up" data-t="lantern"><svg class="ic" viewBox="0 0 24 24"><use href="#i-lantern"/></svg><b>灯笼</b></div>
+        <div class="pc"></div><div class="pc"></div>
+      </div>
+      <p class="bubble">三张吉他！</p>
+      <p class="stamp">真的<br>假的</p>
+    </div>
+    <svg class="spark" style="left:calc(var(--u)*7);top:calc(var(--u)*56 + var(--top));width:calc(var(--u)*7);height:calc(var(--u)*7)" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12Z"/></svg><svg class="spark" style="left:calc(var(--u)*5);top:calc(var(--u)*152 + var(--top));width:calc(var(--u)*5);height:calc(var(--u)*5)" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12Z"/></svg><svg class="spark" style="left:calc(var(--u)*90);top:calc(var(--u)*134 + var(--top));width:calc(var(--u)*4);height:calc(var(--u)*4)" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12Z"/></svg>
+    <p class="cover-say">一部手机轮流传，2 到 6 人。</p>
+    <div class="foot col">
+      <button class="btn" id="goSeats">开一局</button>
+      <button class="link" data-rules>怎么玩</button>
+    </div>
+  </section>
+
+  <!-- 入座 -->
+  <section class="view v-seats form">
+    <p class="eyebrow">第一步</p>
+    <h2>入座</h2>
+    <p class="lead">按座位顺序写下每个人的名字，2 到 6 人。手机会按这个顺序往下传。</p>
+    <div class="field">
+      <input id="nameInput" type="text" maxlength="6" placeholder="名字，最多 6 个字" autocomplete="off" enterkeyhint="done">
+      <button class="btn" id="addName">加入</button>
+    </div>
+    <div class="scroll" id="seatList"></div>
+    <div class="actions">
+      <button class="btn" id="seatsDone" disabled>发牌</button>
+      <button class="link" data-rules>怎么玩</button>
+    </div>
+  </section>
+
+  <!-- 游戏 -->
+  <section class="view v-game">
+    <div class="bar">
+      <p class="round" id="round"></p>
+      <div><button class="link" data-rules>规则</button><button class="link" id="quit">结束</button></div>
+    </div>
+
+    <!-- 交接：全桌都能看 -->
+    <div class="step s-handoff">
+      <p class="turn"><em>轮到</em><b id="hName"></b></p>
+      <div class="table" id="hTable"></div>
+      <p class="table-name"><small>本局桌牌</small><strong id="hTableName"></strong></p>
+      <p class="say" id="hSay"></p>
+      <div class="roster" id="roster"></div>
+      <p class="pads" id="hPads"></p>
+      <div class="foot"><button class="btn" id="look"></button></div>
+    </div>
+
+    <!-- 出牌：只给当前这个人看 -->
+    <div class="step s-turn">
+      <p class="turn"><em>轮到</em><b id="tName"></b></p>
+      <p class="say" id="tSay"></p>
+      <div class="hand" id="hand"></div>
+      <p class="tip" id="tip"></p>
+      <p class="hide"><button class="link" id="hideHand">先把牌盖起来</button></p>
+      <div class="foot">
+        <button class="btn red" id="call">质疑</button>
+        <button class="btn" id="play" disabled>选牌</button>
+      </div>
+    </div>
+
+    <!-- 开牌 -->
+    <div class="step s-reveal">
+      <p class="verdict" id="verdict"></p>
+      <div class="shown" id="shown"></div>
+      <p class="say" id="rSay"></p>
+      <div class="foot"><button class="btn" id="toPenalty">去翻杯垫</button></div>
+    </div>
+
+    <!-- 翻杯垫 -->
+    <div class="step s-penalty">
+      <p class="turn"><em>翻一张</em><b id="pName"></b></p>
+      <div class="coasters" id="coasters"></div>
+      <p class="say" id="pSay"></p>
+      <div class="foot"><button class="btn" id="next" disabled>下一局</button></div>
+    </div>
+
+    <!-- 结果 -->
+    <div class="step s-win">
+      <p class="win-title">赢了</p>
+      <p class="win-name" id="wName"></p>
+      <div class="foot col">
+        <button class="btn" id="again">原班人马再来一局</button>
+        <button class="link" id="reseat">换人</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 规则 -->
+  <div class="rules" id="rules">
+    <p class="eyebrow">规则</p>
+    <h2>怎么玩</h2>
+    <ol>
+      <li>牌有三种：吉他、酒杯、灯笼，另有几张“小屋”是万能牌。每人发 5 张。</li>
+      <li>每局随机定一种“桌牌”。轮到你时，扣着打出 1 到 3 张，默认声称“这几张都是桌牌”。可以说真话，也可以吹牛。</li>
+      <li>下家可以直接跟牌，也可以喊“质疑”，翻开上家刚打的牌。</li>
+      <li>翻开后只要有一张不是桌牌或小屋，出牌的人输；全是真的，质疑的人输。</li>
+      <li>输的人翻一张杯垫。六张里五张“安全”，喝一口自己的酒；一张“魔鬼”，喝一杯魔鬼杯并出局。翻开的安全杯垫不盖回去，越往后越危险。</li>
+      <li>有人翻到魔鬼后，杯垫重新洗。每次有人输都重新发牌、换桌牌。最后留在桌上的人赢。</li>
+      <li>不想喝随时可以用无酒精饮料代替。只输赢酒水，不赌钱。</li>
+    </ol>
+    <button class="btn" id="closeRules">知道了</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var app = $('app');
+  var KEY = 'xiaowu.bluff.v1';
+  var TYPES = ['guitar', 'glass', 'lantern'];
+  var NAME = { guitar: '吉他', glass: '酒杯', lantern: '灯笼', wild: '小屋' };
+  var SVGNS = 'http://www.w3.org/2000/svg';
+
+  var names = [];
+  try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved && saved.length) names = saved; } catch (e) {}
+  function saveNames() { try { localStorage.setItem(KEY, JSON.stringify(names)); } catch (e) {} }
+
+  /* G：一局游戏的全部状态 */
+  var G = null, sel = [];
+
+  /* ---------- 小工具 ---------- */
+  var toastTimer;
+  function toast(msg) {
+    var t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2000);
+  }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  function rand(n) { return Math.floor(Math.random() * n); }
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = rand(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function show(view) { app.setAttribute('data-view', view); if (document.activeElement) document.activeElement.blur(); }
+  function step(s) { app.setAttribute('data-step', s); }
+  function card(type, cls) {
+    var c = el('div', 'pc' + (cls ? ' ' + cls : '')); c.setAttribute('data-t', type);
+    var svg = document.createElementNS(SVGNS, 'svg'); svg.setAttribute('class', 'ic'); svg.setAttribute('viewBox', '0 0 24 24');
+    var use = document.createElementNS(SVGNS, 'use'); use.setAttribute('href', '#i-' + type);
+    svg.appendChild(use); c.appendChild(svg); c.appendChild(el('b', null, NAME[type]));
+    return c;
+  }
+  /* 往一段文字里放加粗的名字，不拼 HTML */
+  function say(node, parts) {
+    node.textContent = '';
+    parts.forEach(function (p) { node.appendChild(typeof p === 'string' ? document.createTextNode(p) : el('b', null, p[0])); });
+  }
+
+  /* ---------- 入座 ---------- */
+  function renderSeats() {
+    var box = $('seatList'); box.textContent = '';
+    if (!names.length) box.appendChild(el('p', 'empty', '还没有人入座。'));
+    names.forEach(function (name, i) {
+      var row = el('div', 'seat');
+      row.appendChild(el('span', 'no', String(i + 1)));
+      row.appendChild(el('span', 'nm', name));
+      var x = el('button', 'x', '×'); x.setAttribute('aria-label', '移除 ' + name);
+      x.onclick = function () { names.splice(i, 1); saveNames(); renderSeats(); };
+      row.appendChild(x); box.appendChild(row);
+    });
+    $('seatsDone').disabled = names.length < 2;
+    $('seatsDone').textContent = names.length < 2 ? '至少 2 个人' : '发牌';
+  }
+  function addName() {
+    var name = String($('nameInput').value).replace(/\s+/g, ' ').trim().slice(0, 6);
+    if (!name) return toast('先写个名字');
+    if (names.indexOf(name) > -1) return toast('已经有同名的人了');
+    if (names.length >= 6) return toast('最多 6 个人');
+    names.push(name); $('nameInput').value = ''; saveNames(); renderSeats();
+  }
+  $('addName').onclick = addName;
+  $('nameInput').onkeydown = function (e) { if (e.key === 'Enter' && !e.isComposing) addName(); };
+  $('goSeats').onclick = function () { renderSeats(); show('seats'); };
+  $('seatsDone').onclick = newGame;
+
+  /* ---------- 规则 ---------- */
+  [].forEach.call(document.querySelectorAll('[data-rules]'), function (b) { b.onclick = function () { $('rules').classList.add('on'); }; });
+  $('closeRules').onclick = function () { $('rules').classList.remove('on'); };
+
+  /* ---------- 一局的流程 ---------- */
+  function newCoasters() {
+    var devil = rand(6), a = [];
+    for (var i = 0; i < 6; i++) a.push({ devil: i === devil, open: false });
+    return a;
+  }
+  function alive() { return G.players.filter(function (p) { return p.alive; }); }
+  function nextAlive(from) {
+    for (var k = 1; k <= G.players.length; k++) { var i = (from + k) % G.players.length; if (G.players[i].alive) return i; }
+    return -1;
+  }
+  /* 下一个手里还有牌的人（不含自己）；没有则 -1 */
+  function nextWithCards(from) {
+    for (var k = 1; k < G.players.length; k++) { var i = (from + k) % G.players.length; if (G.players[i].alive && G.players[i].hand.length) return i; }
+    return -1;
+  }
+  function newGame() {
+    G = { players: names.map(function (n) { return { name: n, alive: true, hand: [] }; }), coasters: newCoasters(), round: 0, turn: 0, table: null, last: null, res: null };
+    show('game');
+    deal(rand(G.players.length), null);
+  }
+  /* 发牌：4 人以内用 20 张（三种各 6 + 2 张小屋），5–6 人用 30 张（各 9 + 3 张小屋） */
+  function deal(start, note) {
+    var n = alive().length, per = n <= 4 ? 6 : 9, wilds = n <= 4 ? 2 : 3, deck = [], i;
+    TYPES.forEach(function (t) { for (i = 0; i < per; i++) deck.push(t); });
+    for (i = 0; i < wilds; i++) deck.push('wild');
+    shuffle(deck);
+    G.players.forEach(function (p) { p.hand = p.alive ? deck.splice(0, 5) : []; });
+    G.table = TYPES[rand(3)]; G.last = null; G.res = null; G.round++;
+    G.turn = G.players[start].alive ? start : nextAlive(start);
+    G.note = note;
+    handoff();
+  }
+
+  function renderRoster(box) {
+    box.textContent = '';
+    G.players.forEach(function (p, i) {
+      var c = el('span', 'chip' + (!p.alive ? ' out' : i === G.turn ? ' now' : ''), p.name);
+      if (p.alive) c.appendChild(el('i', null, p.hand.length + ' 张'));
+      box.appendChild(c);
+    });
+  }
+  function handoff() {
+    var me = G.players[G.turn];
+    $('round').textContent = '第' + G.round + '局';
+    $('hName').textContent = me.name;
+    var t = $('hTable'); t.textContent = ''; t.appendChild(card(G.table, 'big'));
+    $('hTableName').textContent = NAME[G.table];
+    if (G.last) say($('hSay'), [[G.players[G.last.by].name], ' 扣下 ', [G.last.cards.length + ' 张'], '，说都是' + NAME[G.table] + '。信不信，由 ', [me.name], ' 决定。']);
+    else say($('hSay'), [(G.note ? G.note : '') + '新发了牌，', [me.name], ' 先出。']);
+    renderRoster($('roster'));
+    var left = G.coasters.filter(function (c) { return !c.open; }).length;
+    $('hPads').textContent = '杯垫还剩 ' + left + ' 张没翻，其中 1 张是魔鬼';
+    $('look').textContent = '我是' + me.name + '，看牌';
+    sel = [];
+    step('handoff');
+  }
+  $('look').onclick = function () { renderTurn(); step('turn'); };
+  $('hideHand').onclick = function () { sel = []; step('handoff'); };
+
+  function renderTurn() {
+    var me = G.players[G.turn], solo = nextWithCards(G.turn) === -1;
+    $('tName').textContent = me.name;
+    if (G.last) say($('tSay'), ['桌牌是', [NAME[G.table]], '。', [G.players[G.last.by].name], ' 刚扣下 ', [G.last.cards.length + ' 张'], '。信，还是不信？']);
+    else say($('tSay'), ['桌牌是', [NAME[G.table]], '。你先出，扣下 1 到 3 张。']);
+    var hand = $('hand'); hand.textContent = '';
+    me.hand.forEach(function (type, i) {
+      var c = card(type);
+      if (sel.indexOf(i) > -1) c.classList.add('sel');
+      c.onclick = function () {
+        if (solo) return;
+        var at = sel.indexOf(i);
+        if (at > -1) sel.splice(at, 1);
+        else if (sel.length >= 3) return toast('一次最多出 3 张');
+        else sel.push(i);
+        renderTurn();
+      };
+      hand.appendChild(c);
+    });
+    $('call').style.display = G.last ? '' : 'none';
+    var play = $('play');
+    if (solo) {                       // 只剩自己有牌：出了也没人能质疑，只能选质疑或重发
+      $('tip').textContent = '只剩你手里有牌了';
+      play.disabled = false; play.textContent = '不质疑，重新发牌';
+    } else {
+      $('tip').textContent = '点牌选中，打出去的牌一律算作“' + NAME[G.table] + '”';
+      play.disabled = !sel.length; play.textContent = sel.length ? '扣下 ' + sel.length + ' 张' : '选牌';
+    }
+  }
+  $('play').onclick = function () {
+    var me = G.players[G.turn];
+    if (nextWithCards(G.turn) === -1) return deal(G.turn, '没人质疑，这局不罚。');
+    if (!sel.length) return;
+    var picked = sel.slice().sort(function (a, b) { return b - a; }).map(function (i) { return me.hand.splice(i, 1)[0]; });
+    G.last = { by: G.turn, cards: picked };
+    G.turn = nextWithCards(G.turn);
+    handoff();
+  };
+  $('call').onclick = function () {
+    if (!G.last) return;
+    var lied = G.last.cards.some(function (c) { return c !== G.table && c !== 'wild'; });
+    G.res = { lied: lied, loser: lied ? G.last.by : G.turn };
+    var liar = G.players[G.last.by].name, doubter = G.players[G.turn].name;
+    var v = $('verdict'); v.textContent = lied ? '吹牛！' : '真话！'; v.className = 'verdict' + (lied ? '' : ' honest');
+    var box = $('shown'); box.textContent = '';
+    G.last.cards.forEach(function (c) { box.appendChild(card(c, c !== G.table && c !== 'wild' ? 'bad' : '')); });
+    if (lied) say($('rSay'), [[liar], ' 扣下的不全是' + NAME[G.table] + '，被 ', [doubter], ' 抓到了。', [liar], ' 去翻杯垫。']);
+    else say($('rSay'), [[liar], ' 没吹牛。', [doubter], ' 质疑失败，去翻杯垫；', [liar], ' 还可以指定一个人陪着喝一口。']);
+    step('reveal');
+  };
+
+  /* ---------- 翻杯垫 ---------- */
+  $('toPenalty').onclick = function () {
+    $('pName').textContent = G.players[G.res.loser].name;
+    G.res.picked = false;
+    renderCoasters(-1);
+    var left = G.coasters.filter(function (c) { return !c.open; }).length;
+    $('pSay').textContent = '还剩 ' + left + ' 张，1 张是魔鬼。点一张翻开。';
+    $('next').disabled = true; $('next').textContent = '下一局';
+    step('penalty');
+  };
+  function renderCoasters(fresh) {
+    var box = $('coasters'); box.textContent = '';
+    G.coasters.forEach(function (c, i) {
+      var b = el('button', 'pad' + (c.open ? (c.devil ? ' devil' : i === fresh ? ' fresh' : ' open') : ''), c.open ? (c.devil ? '魔鬼' : '安全') : '');
+      b.setAttribute('aria-label', c.open ? (c.devil ? '魔鬼' : '安全') : '第 ' + (i + 1) + ' 张杯垫');
+      b.onclick = function () { flip(i); };
+      box.appendChild(b);
+    });
+  }
+  function flip(i) {
+    var c = G.coasters[i], loser = G.players[G.res.loser];
+    if (c.open || G.res.picked) return;
+    G.res.picked = true; c.open = true;
+    renderCoasters(i);
+    if (c.devil) {
+      loser.alive = false; G.res.devil = true;
+      say($('pSay'), ['魔鬼！', [loser.name], ' 喝一杯魔鬼杯，出局。']);
+    } else {
+      say($('pSay'), ['安全。', [loser.name], ' 喝一口自己的酒，留在桌上。']);
+    }
+    $('next').disabled = false;
+    $('next').textContent = alive().length === 1 ? '看结果' : '下一局';
+  }
+  $('next').onclick = function () {
+    var loserIdx = G.res.loser;
+    if (G.res.devil) G.coasters = newCoasters();
+    var rest = alive();
+    if (rest.length === 1) { $('wName').textContent = rest[0].name; return step('win'); }
+    deal(loserIdx, G.res.devil ? '杯垫重新洗过，' : '');     // 输的人先出；已出局则顺延
+  };
+
+  $('again').onclick = newGame;
+  $('reseat').onclick = function () { renderSeats(); show('seats'); };
+  $('quit').onclick = function () { if (window.confirm('结束这一局，回到入座？')) { renderSeats(); show('seats'); } };
+
+  /* 预览某一屏：?demo=seats | handoff | turn | reveal | penalty | win */
+  var demo = new URLSearchParams(location.search).get('demo');
+  if (demo) {
+    saveNames = function () {};
+    names = ['阿杰', '小林', '大鹏', '晓雯'];
+    renderSeats();
+    if (demo === 'seats') show('seats');
+    else {
+      newGame();
+      G.table = 'guitar'; G.turn = 1; G.round = 3;
+      G.players[1].hand = ['guitar', 'lantern', 'wild', 'glass', 'guitar'];
+      G.players[0].hand.length = 3; G.players[3].alive = false; G.players[3].hand = [];
+      G.last = { by: 0, cards: ['guitar', 'lantern'] }; G.coasters[1].open = !G.coasters[1].devil; G.coasters[4].open = !G.coasters[4].devil;
+      handoff();
+      if (demo === 'turn') { sel = [0, 2]; renderTurn(); step('turn'); }
+      if (demo === 'reveal' || demo === 'penalty') { $('call').onclick(); }
+      if (demo === 'penalty') { $('toPenalty').onclick(); flip(G.coasters.findIndex(function (c) { return !c.open && !c.devil; })); }
+      if (demo === 'win') { $('wName').textContent = '小林'; step('win'); }
+    }
+  }
+})();
+</script>
+</body>
+</html>

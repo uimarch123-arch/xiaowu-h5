@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#170b05">
+<title>泡泡音乐会｜大冰的小屋 · 小屋之夜</title>
+<link rel="preload" as="image" href="assets/room.jpg">
+<link rel="preload" as="image" href="assets/collections/music.jpg">
+
+<style>
+/* 字体：思源宋体（开源，可商用）。Heavy 做标题，Medium 做正文；精简版只含页面用字，其余字回落系统宋体 */
+/* 主标题：叶根友刀锋黑草（精简版只含标题用字；标题换字后需重新打包） */
+@font-face{font-family:"Xiaowu Brush";font-display:swap;
+  src:url("assets/fonts/YeGenYouDaoFengHeiCao.subset.woff2?v=paopao") format("woff2"),local("叶根友刀锋黑草")}
+@font-face{font-family:"Xiaowu Serif";font-weight:900;font-display:swap;
+  src:url("assets/fonts/SourceHanSerifCN-Heavy.subset.woff2") format("woff2")}
+@font-face{font-family:"Xiaowu Serif";font-weight:500;font-display:swap;
+  src:url("assets/fonts/SourceHanSerifCN-Medium.subset.woff2") format("woff2")}
+:root{
+  --bg:#170b05;
+  --tan:#f1cda0;
+  --tan-dim:rgba(241,205,160,.75);
+  --tan-faint:rgba(241,205,160,.35);
+  --cream:#f7e5cd;
+  --amber:#f3a553;
+  --red:#e5513a;
+  --song:"Xiaowu Serif","Source Han Serif SC","Source Han Serif CN","Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  --display:"Xiaowu Brush",var(--song);
+  /* 以下由脚本按屏幕尺寸写入 */
+  --W:100vw; --H:100vh; --u:1vw;
+  --stageH:100vh; --stageTop:0px; --zoneH:36vh;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#050302;overflow:hidden;overscroll-behavior:none}
+body{font-family:var(--song);font-weight:500;color:var(--tan);-webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none;touch-action:none}
+
+.app{position:fixed;left:50%;top:0;width:var(--W);height:var(--H);transform:translateX(-50%);overflow:hidden;background:var(--bg)}
+.app::after{ /* 颗粒质感 */
+  content:"";position:absolute;inset:0;z-index:50;pointer-events:none;opacity:.11;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- 翻页 ---------- */
+.page{position:absolute;inset:0;overflow:hidden;opacity:0;visibility:hidden;transform:translateY(7%);
+  transition:opacity .75s ease,transform .9s cubic-bezier(.2,.7,.2,1),visibility 0s .9s}
+.page.is-prev{transform:translateY(-7%)}
+.page.is-active{opacity:1;visibility:visible;transform:none;transition-delay:0s,0s,0s}
+.app.no-anim .page{transition:none}
+
+.rv{opacity:0;transform:translateY(calc(var(--u)*3));transition:opacity .5s ease,transform .5s ease}
+.page.is-active .rv{opacity:1;transform:none;
+  transition:opacity 1s ease calc(var(--d,0)*130ms + 350ms),transform 1.1s cubic-bezier(.2,.7,.2,1) calc(var(--d,0)*130ms + 350ms)}
+
+/* ---------- 小屋外景（末屏） ---------- */
+.stage{position:absolute;left:0;top:var(--stageTop);width:100%;height:var(--stageH);transform-origin:50% 79%;will-change:transform}
+.stage img{position:absolute;left:50%;top:0;height:100%;width:auto;min-width:100%;transform:translateX(-50%);object-fit:cover;display:block;pointer-events:none}
+.lantern{position:absolute;width:26%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,110,80,.42) 0%,rgba(215,80,60,.16) 34%,transparent 66%);
+  animation:flicker 4.2s ease-in-out infinite}
+.lantern.l{left:9.7%;top:64.5%}
+.lantern.r{left:90.2%;top:64.5%;animation-delay:-1.7s;animation-duration:5.1s}
+@keyframes flicker{0%,100%{opacity:.45;transform:translate(-50%,-50%) scale(1)}35%{opacity:.9;transform:translate(-50%,-50%) scale(1.07)}55%{opacity:.6}75%{opacity:1;transform:translate(-50%,-50%) scale(1.03)}}
+
+.scrim-bottom{position:absolute;left:0;right:0;bottom:0;height:20%;pointer-events:none;
+  background:linear-gradient(0deg,rgba(8,7,6,.88) 0%,rgba(8,7,6,.4) 55%,rgba(8,7,6,0) 100%)}
+
+.dust{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.dust i{position:absolute;bottom:-2%;width:3px;height:3px;border-radius:50%;background:#ffd0a0;filter:blur(.6px);opacity:0;animation:rise linear infinite}
+@keyframes rise{0%{transform:translate3d(0,0,0);opacity:0}12%{opacity:var(--o,.5)}80%{opacity:var(--o,.5)}100%{transform:translate3d(var(--dx,20px),calc(var(--H)*-.75),0);opacity:0}}
+
+/* 上半部暗部的海水纹，极淡 */
+.pattern{position:absolute;left:0;right:0;top:0;height:calc(var(--zoneH) + var(--u)*6);pointer-events:none;opacity:.1;mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'%3E%3Cdefs%3E%3Cg id='w' fill='%23000' stroke='%23d9c8a9' stroke-width='.9'%3E%3Ccircle r='29.5'/%3E%3Ccircle r='22'/%3E%3Ccircle r='14.5'/%3E%3Ccircle r='7'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23w' x='30' y='-15'/%3E%3Cuse href='%23w' x='0' y='0'/%3E%3Cuse href='%23w' x='60' y='0'/%3E%3Cuse href='%23w' x='30' y='15'/%3E%3Cuse href='%23w' x='0' y='30'/%3E%3Cuse href='%23w' x='60' y='30'/%3E%3Cuse href='%23w' x='30' y='45'/%3E%3C/svg%3E");
+  background-size:calc(var(--u)*16) calc(var(--u)*8);background-position:center top;
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.7) 60%,transparent 100%);mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.7) 60%,transparent 100%)}
+
+.orn{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*3.5);font-size:calc(var(--u)*3.4);letter-spacing:.5em;color:var(--tan-dim)}
+.orn b{font-weight:500;margin-right:-.5em}
+.orn::before,.orn::after{content:"";width:calc(var(--u)*11);height:1px}
+.orn::before{background:linear-gradient(90deg,transparent,var(--tan-dim))}
+.orn::after{background:linear-gradient(270deg,transparent,var(--tan-dim))}
+
+.final{z-index:1}
+
+/* ---------- 屋内：一张场景，镜头在三屏之间移动 ---------- */
+.room{position:absolute;inset:0;z-index:2;overflow:hidden;background:#0d0b0a;opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .9s ease,visibility 0s .9s}
+.app.in-room .room{opacity:1;visibility:visible;transition:opacity .9s ease,visibility 0s}
+.room img{position:absolute;left:0;top:0;display:block;transform-origin:0 0;will-change:transform;
+  transition:transform 1.7s cubic-bezier(.55,0,.15,1)}
+.room::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(0deg,rgba(10,8,7,.97) 0%,rgba(10,8,7,.92) 30%,rgba(10,8,7,.6) 46%,rgba(10,8,7,0) 64%),
+             linear-gradient(180deg,rgba(10,8,7,.55) 0%,rgba(10,8,7,0) 22%)}
+
+.inner{z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;
+  padding:0 calc(var(--u)*6) calc(var(--u)*17 + env(safe-area-inset-bottom))}
+.h2{margin-top:calc(var(--u)*4.5);font-family:var(--display);font-size:calc(var(--u)*10.5);font-weight:400;letter-spacing:.08em;line-height:1.2;white-space:nowrap;color:#ece2d0;
+  text-shadow:0 calc(var(--u)*.6) calc(var(--u)*4) rgba(0,0,0,.7)}
+.body{margin-top:calc(var(--u)*4.5);font-size:calc(var(--u)*3.7);line-height:1.95;letter-spacing:.1em;color:var(--cream);text-shadow:0 1px 8px rgba(0,0,0,.8)}
+/* 今晚有什么：四张卡片，围着画面里的主体排成一道弧 */
+.cards{position:relative;display:flex;justify-content:center;gap:calc(var(--u)*2.4);width:100%;margin-bottom:calc(var(--u)*6)}
+.card{flex:none;width:calc(var(--u)*20);padding:calc(var(--u)*1.8) calc(var(--u)*1.6) calc(var(--u)*2.2);border-radius:calc(var(--u)*3.6);
+  background:linear-gradient(160deg,#f4ecdd 0%,#e6d9c2 100%);color:#2b1e15;text-decoration:none;text-align:center;
+  box-shadow:0 calc(var(--u)*2.5) calc(var(--u)*6) rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.25) inset;
+  opacity:0;transform:translateY(calc(var(--u)*14)) rotate(0deg) scale(.7);
+  transition:opacity .4s ease,transform .5s ease}
+.page.is-active .card{opacity:1;transform:translateY(calc(var(--u)*var(--y)*-1)) rotate(var(--r)) scale(1);
+  transition:opacity .7s ease calc(var(--i)*110ms + 500ms),transform 1.1s cubic-bezier(.2,1.25,.3,1) calc(var(--i)*110ms + 500ms)}
+.card .pic{display:block;width:100%;aspect-ratio:1;position:relative}
+.card .pic svg{width:100%;height:100%;display:block;fill:none;stroke:#3b2a1e;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.card em{display:block;margin-top:calc(var(--u)*1.4);font-style:normal;font-weight:900;font-size:calc(var(--u)*3.2);letter-spacing:.06em;line-height:1.25;white-space:nowrap}
+.card small{display:block;margin-top:calc(var(--u)*.5);font-size:calc(var(--u)*2.3);letter-spacing:.04em;line-height:1.3;color:rgba(43,30,21,.62);white-space:nowrap}
+a.card:active{filter:brightness(.92)}
+.card .go{position:absolute;right:calc(var(--u)*-1);top:calc(var(--u)*-1);width:calc(var(--u)*5);height:calc(var(--u)*5);border-radius:50%;background:#7c2a22;color:#f4ecdd;
+  font-size:calc(var(--u)*2.8);line-height:calc(var(--u)*5);font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.card{position:relative}
+/* 弧形：--y 抬高（单位 u），--r 倾斜 */
+.c-music .card:nth-child(1){--y:15;--r:-10deg}.c-music .card:nth-child(2){--y:1;--r:-4deg}.c-music .card:nth-child(3){--y:1;--r:4deg}.c-music .card:nth-child(4){--y:15;--r:10deg}
+.c-game  .card:nth-child(1){--y:0;--r:-6deg}.c-game  .card:nth-child(2){--y:3;--r:-1deg}.c-game  .card:nth-child(3){--y:13;--r:6deg}.c-game  .card:nth-child(4){--y:30;--r:12deg}
+.c-drink .card:nth-child(1){--y:30;--r:-12deg}.c-drink .card:nth-child(2){--y:13;--r:-6deg}.c-drink .card:nth-child(3){--y:3;--r:1deg}.c-drink .card:nth-child(4){--y:0;--r:6deg}
+/* 唱片 */
+.disc{position:absolute;inset:6%;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.45);
+  background:radial-gradient(circle,#f4ecdd 0 4%,var(--lab) 4.5% 30%,rgba(0,0,0,0) 30.5%),
+    repeating-radial-gradient(circle,rgba(255,255,255,.09) 0 .6px,rgba(255,255,255,0) .6px 2.6px),
+    conic-gradient(from 20deg,#17120f,#3a322c 12%,#17120f 25%,#17120f 50%,#3a322c 62%,#17120f 75%,#17120f);
+  animation:spin 9s linear infinite;animation-play-state:paused}
+.page.is-active .disc{animation-play-state:running}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.foot{position:absolute;left:0;right:0;bottom:calc(var(--u)*7 + env(safe-area-inset-bottom));font-size:calc(var(--u)*2.6);letter-spacing:.5em;color:var(--tan-faint);text-align:center}
+
+/* ---------- 末屏 ---------- */
+.final-zone{position:absolute;inset:0;pointer-events:none}
+.final .h1{position:absolute;left:0;right:0;text-align:center;top:calc(var(--zoneH)*.5 - var(--u)*9);font-family:var(--display);font-size:calc(var(--u)*21);font-weight:400;letter-spacing:.06em;line-height:1;color:#ece2d0;
+  text-shadow:0 calc(var(--u)*.8) calc(var(--u)*3.5) rgba(0,0,0,.55)}
+.info{position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*7);bottom:calc(var(--u)*27 + env(safe-area-inset-bottom));pointer-events:auto;
+  padding:calc(var(--u)*1) calc(var(--u)*4.5);border:1px solid var(--tan-faint);border-radius:calc(var(--u)*3.5);
+  background:rgba(14,12,11,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.info div{display:flex;align-items:baseline;gap:calc(var(--u)*3.5);padding:calc(var(--u)*3) 0;border-bottom:1px solid var(--tan-faint);text-align:left}
+.info div:last-child{border-bottom:0}
+.info dt{flex:none;font-size:calc(var(--u)*3);letter-spacing:.14em;color:var(--tan-dim)}
+.info dd{flex:1;font-size:calc(var(--u)*3.7);letter-spacing:.03em;line-height:1.55;color:var(--cream);-webkit-user-select:text;user-select:text}
+.route{position:absolute;left:50%;bottom:calc(var(--u)*9 + env(safe-area-inset-bottom));margin-left:calc(var(--u)*-26);width:calc(var(--u)*52);height:calc(var(--u)*13);
+  display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*2.5);
+  border:1px solid var(--tan);border-radius:calc(var(--u)*7);background:rgba(16,10,6,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  color:var(--tan);text-decoration:none;font-size:calc(var(--u)*4);letter-spacing:.34em;box-shadow:0 0 calc(var(--u)*9) rgba(0,0,0,.5)}
+.route:active{background:var(--tan);color:#1a110a}
+.route svg{width:calc(var(--u)*4.4);height:calc(var(--u)*4.4);fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+@media (prefers-reduced-motion:reduce){
+  .room img{transition:none}
+  .lantern,.dust i{animation:none}
+}
+</style>
+<link rel="stylesheet" href="assets/warm-night.css?v=visit-backdrop">
+</head>
+<body>
+<audio id="background-music" src="assets/background-music.m4a" autoplay loop preload="auto"></audio>
+<button id="music-toggle" class="music-toggle" type="button" aria-label="播放背景音乐" aria-pressed="false">♪ <span>播放音乐</span></button>
+<main class="app entering" id="app" data-page="0">
+
+
+  <!-- 屋内场景：进来就是这里，镜头在舞台 / 吧台 / 桌边之间移动 -->
+  <div class="room" id="room"><img src="assets/room.jpg" alt=""></div>
+
+  <!-- 主页｜泡泡音乐会（舞台）；左右两侧的吧台、桌边是拓展内容 -->
+  <section class="page venue" id="venue" aria-label="泡泡音乐会">
+    <div class="dust"></div>
+    <header class="venue-heading rv" id="venue-heading" aria-live="polite">
+      <p class="venue-eyebrow" id="scene-eyebrow">大冰的小屋 · 小屋之夜</p>
+      <h1 class="venue-title" id="scene-title">泡泡音乐会</h1>
+      <p class="venue-sub" id="scene-sub"></p>
+    </header>
+    <button class="venue-hotspot hotspot-music" data-open="music" data-x=".462" data-y=".474" aria-label="点击吉他，查看今晚歌单">
+      <span>今晚歌单 <b aria-hidden="true">↗</b></span>
+    </button>
+    <button class="venue-hotspot hotspot-games" data-open="games" data-x=".14" data-y=".568" aria-label="点击桌上的纸牌，查看桌边游戏">
+      <span>看看玩什么 <b aria-hidden="true">↗</b></span>
+    </button>
+    <button class="venue-hotspot hotspot-drinks" data-open="drinks" data-x=".884" data-y=".446" aria-label="点击吧台酒杯，查看特调酒单">
+      <span>看看酒单 <b aria-hidden="true">↗</b></span>
+    </button>
+    <div class="venue-scene-copy rv" style="--d:2">
+      <p id="scene-description"></p>
+    </div>
+    <nav class="scene-controls rv" style="--d:3" aria-label="切换小屋的角落">
+      <button id="scene-prev" aria-label="上一个角落">‹</button>
+      <div class="scene-tabs">
+        <button data-scene="0" class="tab-extra"><small>还可以</small>喝一杯</button>
+        <button data-scene="1" class="tab-main" aria-current="true"><small>今晚</small>音乐会</button>
+        <button data-scene="2" class="tab-extra"><small>还可以</small>玩一局</button>
+      </div>
+      <button id="scene-next" aria-label="下一个角落">›</button>
+    </nav>
+    <button class="venue-info rv" style="--d:4" id="visit-info">时间与地址 <span aria-hidden="true">↗</span></button>
+  </section>
+
+  <!-- 主题内容｜泡泡音乐会歌单 -->
+  <section class="page inner collection-music" id="music">
+    <button class="back-to-venue" aria-label="返回小屋"><span aria-hidden="true">‹</span> 返回小屋</button>
+    <header class="collection-heading rv">
+      <p>Zhao Lei · Live at the Cabin</p>
+      <div class="collection-title" lang="en">Chengdu</div>
+    </header>
+    <figure class="collection-art rv" style="--d:1">
+      <div class="collection-visual" role="img" aria-label="music" style="background-image:url('assets/collections/music-variants.jpg')"></div>
+    </figure>
+    <div class="cards c-music">
+      <button type="button" class="card" aria-pressed="false" style="--i:0"><span class="pic" aria-hidden="true" style="--sprite-x:0.000000%;--sprite-y:0%"></span><em>成都</em><small>《无法长大》</small></button>
+      <button type="button" class="card" aria-pressed="false" style="--i:1"><span class="pic" aria-hidden="true" style="--sprite-x:66.666667%;--sprite-y:0%"></span><em>南方姑娘</em><small>《赵小雷》</small></button>
+      <button type="button" class="card" aria-pressed="false" style="--i:2"><span class="pic" aria-hidden="true" style="--sprite-x:100.000000%;--sprite-y:0%"></span><em>画</em><small>《赵小雷》</small></button>
+      <button type="button" class="card" aria-pressed="false" style="--i:3"><span class="pic" aria-hidden="true" style="--sprite-x:33.333333%;--sprite-y:0%"></span><em>点一首</em><small>你最想听的</small></button>
+    </div>
+    <p class="orn rv" style="--d:0"><b>今晚歌单</b></p>
+    <h2 class="h2 rv" style="--d:2">听一晚赵雷的歌</h2>
+    <div class="body rv" style="--d:4">
+      <p>《成都》《南方姑娘》《画》，都是会跟着哼的歌。</p>
+      <p>还想听哪一首，提前告诉我们。</p>
+    </div>
+    <p class="foot">大冰的小屋 · 泡泡音乐会</p>
+  </section>
+
+  <!-- 拓展｜除了这场音乐会：桌边游戏 -->
+  <section class="page inner collection-games" id="games">
+    <button class="back-to-venue" aria-label="返回小屋"><span aria-hidden="true">‹</span> 返回小屋</button>
+    <header class="collection-heading rv">
+      <p>Beyond Tonight · The Table</p>
+      <div class="collection-title" lang="en">Games After Dark</div>
+    </header>
+    <figure class="collection-art rv" style="--d:1">
+      <div class="collection-visual" role="img" aria-label="games" style="background-image:url('assets/collections/games-variants.jpg')"></div>
+    </figure>
+    <div class="cards c-game">
+      <button type="button" class="card" aria-pressed="false" style="--i:0"><span class="pic" aria-hidden="true" style="--sprite-x:0.000000%;--sprite-y:50%"></span><em>猜旋律</em><small>听前奏抢答</small></button>
+      <button type="button" class="card" aria-pressed="false" style="--i:1"><span class="pic" aria-hidden="true" style="--sprite-x:33.333333%;--sprite-y:50%"></span><em>故事卡</em><small>抽一张，聊聊</small></button>
+      <button type="button" class="card" aria-pressed="false" style="--i:2" data-game-url="truth-or-dare/index.html"><span class="pic" aria-hidden="true" style="--sprite-x:66.666667%;--sprite-y:50%"></span><em>真心话</em><small>大冒险</small></button>
+      <button type="button" class="card" aria-pressed="false" style="--i:3" data-game-url="bluff/index.html"><span class="pic" aria-hidden="true" style="--sprite-x:100.000000%;--sprite-y:50%"></span><em>谁在吹牛</em><small>骰子局</small></button>
+    </div>
+    <p class="orn rv" style="--d:0"><b>桌边游戏</b></p>
+    <h2 class="h2 rv" style="--d:2">平常日子玩一局</h2>
+    <div class="body rv" style="--d:4">
+      <p>除了这场音乐会，小屋平时也开着门。</p>
+      <p>约上朋友围坐一桌，抽张牌，摇一局骰子。</p>
+    </div>
+    <a class="collection-action" id="game-launch" hidden>开始游戏 <span aria-hidden="true">↗</span></a>
+    <p class="foot">大冰的小屋 · 不止音乐会</p>
+  </section>
+
+  <!-- 拓展｜除了听歌：吧台特调 -->
+  <section class="page inner collection-drinks" id="drinks">
+    <button class="back-to-venue" aria-label="返回小屋"><span aria-hidden="true">‹</span> 返回小屋</button>
+    <header class="collection-heading rv">
+      <p>Beyond the Music · The Bar</p>
+      <div class="collection-title" lang="en">One More Sip</div>
+    </header>
+    <figure class="collection-art rv" style="--d:1">
+      <div class="collection-visual" role="img" aria-label="drinks" style="background-image:url('assets/collections/drinks-variants.jpg')"></div>
+    </figure>
+    <div class="cards c-drink">
+      <button type="button" class="card" aria-pressed="false" style="--i:0"><span class="pic" aria-hidden="true" style="--sprite-x:0.000000%;--sprite-y:100%"></span><em>清爽</em><small>气泡 · 薄荷</small></button>
+      <button type="button" class="card" aria-pressed="false" style="--i:1"><span class="pic" aria-hidden="true" style="--sprite-x:33.333333%;--sprite-y:100%"></span><em>酸甜</em><small>莓果 · 柑橘</small></button>
+      <button type="button" class="card" aria-pressed="false" style="--i:2"><span class="pic" aria-hidden="true" style="--sprite-x:66.666667%;--sprite-y:100%"></span><em>酒感浓</em><small>威士忌基底</small></button>
+      <button type="button" class="card" aria-pressed="false" style="--i:3"><span class="pic" aria-hidden="true" style="--sprite-x:100.000000%;--sprite-y:100%"></span><em>无酒精</em><small>果味特调</small></button>
+    </div>
+    <p class="orn rv" style="--d:0"><b>吧台特调</b></p>
+    <h2 class="h2 rv" style="--d:2">听歌之余喝一杯</h2>
+    <div class="body rv" style="--d:4">
+      <p>除了听歌，吧台整晚都开着。</p>
+      <p>清爽、酸甜，或一杯无酒精特调，<br>把你的口味告诉调酒师。</p>
+    </div>
+    <p class="foot">大冰的小屋 · 不止音乐会</p>
+  </section>
+
+  <!-- 末屏｜赴约信息 -->
+  <section class="page final" id="visit">
+    <button class="back-to-venue" aria-label="返回小屋"><span aria-hidden="true">‹</span> 返回小屋</button>
+    <div class="stage">
+      <img src="assets/visit-backdrop.png" alt="白色帷幔与红色挂毯舞台">
+    </div>
+    <div class="pattern"></div>
+    <div class="scrim-bottom"></div>
+    <div class="final-zone">
+      <h2 class="h1 rv" style="--d:1">小屋见</h2>
+      <p class="final-invitation rv" style="--d:2">赵雷的歌，和一杯喜欢的味道，<br>都等你来。</p>
+      <dl class="info rv" style="--d:3">
+        <div><dt>活动时间</dt><dd data-f="when"></dd></div>
+        <div><dt>活动地点</dt><dd data-f="place"></dd></div>
+        <div><dt>门店地址</dt><dd data-f="address"></dd></div>
+      </dl>
+    </div>
+    <a class="route rv" style="--d:6" id="route" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.500C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+      查看赴约路线
+    </a>
+  </section>
+</main>
+
+<script>
+/* ============ 活动信息：只改这里 ============ */
+var CONFIG = {
+  date:    '11月19日',
+  time:    '［开始时间］',    // 例：'20:00'
+  store:   '［门店名］',      // 例：'丽江店'
+  address: '［详细地址］',
+  guest:   '',                // 嘉宾姓名；也可用链接参数 ?name=张三 逐人生成
+  mapUrl:  ''                 // 导航链接（高德/腾讯/百度地图分享链接）；留空则按店名在高德搜索
+};
+/* ========================================== */
+
+(function(){
+  var app = document.getElementById('app'),
+      room = document.getElementById('room'), roomImg = room.querySelector('img'),
+      pages = [].slice.call(document.querySelectorAll('.page')),
+      venue = document.getElementById('venue'),
+      cur = 0, busy = true, intro = true;
+  var VENUE = 0, VISIT = 4;      // 1–3 是歌单 / 游戏 / 酒单
+  var routes = ['venue', 'music', 'games', 'drinks', 'visit'];
+  var hotspots = [].slice.call(document.querySelectorAll('.venue-hotspot'));
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* 文案填充 */
+  var q = new URLSearchParams(location.search);
+  var guest = (q.get('name') || q.get('to') || CONFIG.guest || '你').slice(0, 12);
+  var data = {
+    date: CONFIG.date, time: CONFIG.time, guest: guest,
+    when: CONFIG.date + ' · ' + CONFIG.time,
+    place: '大冰的小屋 · ' + CONFIG.store,
+    address: CONFIG.address
+  };
+  [].forEach.call(document.querySelectorAll('[data-f]'), function(el){ el.textContent = data[el.getAttribute('data-f')]; });
+  var filled = function(v){ return v && v.indexOf('［') < 0; };
+  var kw = '大冰的小屋' + (filled(CONFIG.store) ? ' ' + CONFIG.store : '');
+  document.getElementById('route').href = CONFIG.mapUrl ||
+    'https://uri.amap.com/search?keyword=' + encodeURIComponent(filled(CONFIG.address) ? CONFIG.address : kw);
+
+  /* 三个角落：中间的舞台是主题（泡泡音乐会），两侧是拓展内容 */
+  var scenes = [
+    {key:'drinks', eyebrow:'除了听歌 · 这里还可以', title:'喝一杯', sub:'吧台整晚都开着',
+     description:'歌听到一半，去吧台点一杯。\n清爽、酸甜，或者无酒精，告诉调酒师就好。', x:.884, y:.446, scale:2.1, tx:.65},
+    {key:'music', eyebrow:'大冰的小屋 · 小屋之夜', title:'泡泡音乐会', sub:data.date + ' ｜ ' + data.time,
+     description:'想邀请' + guest + '，来小屋坐坐。\n一把木吉他，听一晚赵雷的歌。', x:.462, y:.474, scale:2.05, tx:.5},
+    {key:'games', eyebrow:'除了这场音乐会 · 小屋还可以', title:'玩一局', sub:'没有演出的晚上也热闹',
+     description:'约上朋友围坐一桌，抽张牌，摇一局骰子。\n猜旋律、真心话，挑一个喜欢的开场。', x:.14, y:.568, scale:2.3, tx:.42}
+  ];
+  var sceneIndex = 1;
+  var hotspotTimer = null;
+  var suppressClickUntil = 0;
+  var sceneHeading = document.getElementById('venue-heading');
+  var sceneEyebrow = document.getElementById('scene-eyebrow');
+  var sceneTitle = document.getElementById('scene-title');
+  var sceneSub = document.getElementById('scene-sub');
+  var sceneDescription = document.getElementById('scene-description');
+
+  /* 尺寸：手机铺满，桌面端居中成手机画幅 */
+  var RATIO = 2092 / 941;      // 小屋外景图 高/宽（顶部已向上补出暗部）
+  var ROOM = 941 / 1672;       // 屋内图 宽/高
+  var W = 0, H = 0;
+  /* 屋内镜头：fx,fy 看向图上哪一点；s 放大倍数；tx,ty 把这一点放在屏幕的哪个位置 */
+  function cam(drag){
+    var scene = scenes[sceneIndex];
+    var width = Math.max(W, H * ROOM) * (intro ? 1.45 : scene.scale); // 刚进来时站得远一点，再走近舞台
+    var height = width / ROOM;
+    var x = Math.min(0, Math.max(W - width, W * scene.tx - scene.x * width));
+    var y = Math.min(0, Math.max(H - height, H * .46 - scene.y * height));
+    x += drag || 0;
+    roomImg.style.width = width + 'px';
+    roomImg.style.height = height + 'px';
+    roomImg.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
+    hotspots.forEach(function(button){
+      var active = button.dataset.open === scene.key;
+      button.classList.toggle('is-current', active);
+      button.disabled = !active;
+      button.tabIndex = active ? 0 : -1;
+      button.setAttribute('aria-hidden', String(!active));
+      button.style.left = (x + Number(button.dataset.x) * width) + 'px';
+      button.style.top = (y + Number(button.dataset.y) * height) + 'px';
+    });
+  }
+  function setScene(index, remember){
+    index = Math.max(0, Math.min(scenes.length - 1, index));
+    var changed = index !== sceneIndex;
+    sceneIndex = index;
+    var scene = scenes[sceneIndex];
+    venue.dataset.scene = scene.key;
+    sceneEyebrow.textContent = scene.eyebrow;
+    sceneTitle.textContent = scene.title;
+    sceneSub.textContent = scene.sub;
+    sceneDescription.textContent = scene.description;
+    if (changed && !reduceMotion){
+      [sceneHeading, sceneDescription].forEach(function(el){
+        el.animate([{opacity:0, transform:'translateY(10px)'}, {opacity:1, transform:'none'}],
+          {duration:620, easing:'cubic-bezier(.2,.7,.2,1)'});
+      });
+    }
+    document.getElementById('scene-prev').disabled = sceneIndex === 0;
+    document.getElementById('scene-next').disabled = sceneIndex === scenes.length - 1;
+    document.querySelectorAll('[data-scene]').forEach(function(button){
+      button.setAttribute('aria-current', String(Number(button.dataset.scene) === sceneIndex));
+    });
+    if (remember && cur === VENUE){
+      history.replaceState(Object.assign({}, history.state, {sceneIndex:sceneIndex}), '', location.href);
+    }
+    cam();
+  }
+  function layout(){
+    var vw = window.innerWidth, vh = window.innerHeight;
+    W = vw / vh > .62 ? Math.round(vh * .5) : vw; H = vh;
+    var stageH = Math.max(H, W * RATIO), top = H - stageH; // 贴底，多出的部分裁掉顶部暗区
+    var s = document.documentElement.style;
+    s.setProperty('--W', W + 'px'); s.setProperty('--H', H + 'px'); s.setProperty('--u', W / 100 + 'px');
+    s.setProperty('--stageH', stageH + 'px'); s.setProperty('--stageTop', top + 'px');
+    s.setProperty('--zoneH', (stageH * .415 + top) + 'px'); // 屋檐以上的暗部
+    cam();
+    document.querySelectorAll('.collection-visual').forEach(function(visual){
+      var frame = visual.parentElement;
+      visual.style.width = Math.min(frame.clientWidth, frame.clientHeight * 1.5) + 'px';
+    });
+  }
+  layout();
+  window.addEventListener('resize', layout);
+  window.addEventListener('orientationchange', function(){ setTimeout(layout, 200); });
+
+  /* 浮尘 */
+  var dust = venue.querySelector('.dust');
+  for (var i = 0; i < 12; i++){
+    var d = document.createElement('i'), sz = 1.5 + Math.random() * 2.5;
+    d.style.cssText = 'left:' + (Math.random() * 100) + '%;width:' + sz + 'px;height:' + sz + 'px;' +
+      '--o:' + (.25 + Math.random() * .45) + ';--dx:' + (Math.random() * 60 - 30) + 'px;' +
+      'animation-duration:' + (9 + Math.random() * 10) + 's;animation-delay:' + (-Math.random() * 18) + 's';
+    dust.appendChild(d);
+  }
+
+  function render(){
+    pages.forEach(function(p, i){
+      p.classList.toggle('is-active', i === cur);
+      p.classList.toggle('is-prev', i < cur);
+      p.inert = i !== cur;
+      p.setAttribute('aria-hidden', i !== cur ? 'true' : 'false');
+    });
+    app.setAttribute('data-page', cur);
+    app.classList.toggle('in-room', cur === VENUE);
+    cam();
+  }
+  function navigate(route, replace){
+    var index = routes.indexOf(route);
+    if (index < 0) return;
+    clearTimeout(hotspotTimer);
+    hotspots.forEach(function(button){ button.classList.remove('is-opening'); });
+    var from = routes[cur];
+    cur = index;
+    history[replace ? 'replaceState' : 'pushState']({route:route, from:from, sceneIndex:sceneIndex}, '', '#view=' + route);
+    render();
+    busy = false;
+    if (cur !== VENUE) pages[cur].querySelector('.back-to-venue').focus({preventScroll:true});
+  }
+  function returnToVenue(){
+    if (history.state && history.state.from === 'venue'){
+      history.back();
+    } else {
+      navigate('venue', true);
+    }
+  }
+  window.addEventListener('popstate', function(){
+    var index = routes.indexOf(location.hash.replace(/^#(?:view=)?/, ''));
+    clearTimeout(hotspotTimer);
+    hotspots.forEach(function(button){ button.classList.remove('is-opening'); });
+    cur = index >= 0 ? index : VENUE;
+    if (history.state && Number.isInteger(history.state.sceneIndex)) setScene(history.state.sceneIndex);
+    busy = false;
+    render();
+    if (cur === VENUE) document.querySelector('.venue-hotspot.is-current').focus({preventScroll:true});
+  });
+  hotspots.forEach(function(button){
+    button.addEventListener('click', function(){
+      if (busy || Date.now() < suppressClickUntil) return;
+      busy = true;
+      button.classList.add('is-opening');
+      hotspotTimer = setTimeout(function(){ navigate(button.dataset.open); }, reduceMotion ? 0 : 440);
+    });
+  });
+  document.querySelectorAll('.back-to-venue').forEach(function(button){
+    button.addEventListener('click', returnToVenue);
+  });
+  document.getElementById('visit-info').addEventListener('click', function(){ navigate('visit'); });
+  document.getElementById('scene-prev').addEventListener('click', function(){ if (!busy) setScene(sceneIndex - 1, true); });
+  document.getElementById('scene-next').addEventListener('click', function(){ if (!busy) setScene(sceneIndex + 1, true); });
+  document.querySelectorAll('[data-scene]').forEach(function(button){
+    button.addEventListener('click', function(){ if (!busy) setScene(Number(button.dataset.scene), true); });
+  });
+
+  var selections = {
+    music: [
+      /* 第四项：用哪张唱机图（music-variants.jpg 里的第几格；'plain' 为不带封面的唱机） */
+      ['Chengdu', '成都 · 《无法长大》', '橙色吉他封面的黑胶唱片与木质唱机', 0],
+      ['Southern Girl', '南方姑娘 · 《赵小雷》', '酒红玫瑰封面的黑胶唱片与木质唱机', 2],
+      ['The Painting', '画 · 《赵小雷》', '星空封面的黑胶唱片与木质唱机', 3],
+      ['Your Request', '点一首 · 你最想听的', '等你点歌的木质唱机', 'plain']
+    ],
+    games: [
+      ['Name That Tune', '猜旋律 · 听前奏抢答', '复古黄铜麦克风'],
+      ['A Story to Tell', '故事卡 · 抽一张，聊聊', '扇形扑克牌与皮革牌盒'],
+      ['Truth or Dare', '真心话 · 大冒险', '红心和问号故事卡'],
+      ['Liar’s Dice', '谁在吹牛 · 骰子局', '皮革骰盅与骰子']
+    ],
+    drinks: [
+      ['Lemon & Mint', '清爽 · 气泡与薄荷', '薄荷柠檬高脚杯'],
+      ['Dark Cherry Sour', '酸甜 · 莓果与柑橘', '樱桃酸酒高脚杯'],
+      ['Amber Nights', '酒感浓 · 威士忌基底', '琥珀色酒液的浅碟高脚杯'],
+      ['Pineapple Breeze', '无酒精 · 果味特调', '菠萝无酒精特调马天尼杯']
+    ]
+  };
+  document.querySelectorAll('.cards').forEach(function(group){
+    var section = group.closest('.inner');
+    var cards = [].slice.call(group.querySelectorAll('.card'));
+    var visual = section.querySelector('.collection-visual');
+    var title = section.querySelector('.collection-title');
+    var label = section.querySelector('.orn b');
+    var animation = null;
+    var variants = visual.style.backgroundImage;
+    title.setAttribute('aria-live', 'polite');
+    function select(index, animate){
+      var entry = selections[section.id][index];
+      cards.forEach(function(card, i){
+        card.classList.toggle('is-selected', i === index);
+        card.setAttribute('aria-pressed', String(i === index));
+      });
+      var cell = entry[3] == null ? index : entry[3];
+      if (cell === 'plain'){
+        visual.style.backgroundImage = "url('assets/collections/" + section.id + ".jpg')";
+        visual.style.backgroundSize = '100% 100%';
+        visual.style.backgroundPosition = '0 0';
+      } else {
+        visual.style.backgroundImage = variants;
+        visual.style.backgroundSize = '';
+        visual.style.backgroundPosition = (cell % 2 * 100) + '% ' + (Math.floor(cell / 2) * 100) + '%';
+      }
+      visual.setAttribute('aria-label', entry[2]);
+      title.textContent = entry[0];
+      label.textContent = entry[1];
+      if (animation) animation.cancel();
+      if (animate && !reduceMotion){
+        animation = visual.animate([
+          {opacity:.15, transform:'translateY(10px) scale(.96)'},
+          {opacity:1, transform:'translateY(0) scale(1)'}
+        ], {duration:420, easing:'cubic-bezier(.2,.7,.2,1)'});
+      }
+      if (section.id === 'games'){
+        var launch = document.getElementById('game-launch');
+        var url = cards[index].dataset.gameUrl;
+        launch.hidden = !url;
+        if (url){ launch.href = url; launch.firstChild.textContent = '开始' + cards[index].querySelector('em').textContent + ' '; }
+        else launch.removeAttribute('href');
+      }
+    }
+    group.addEventListener('click', function(event){
+      var card = event.target.closest('.card');
+      if (card) select(cards.indexOf(card), true);
+    });
+    select(0, false);
+  });
+  setScene(sceneIndex);
+
+  /* 上下翻：主页 ↔ 赴约信息 */
+  function go(dir){
+    if (busy) return;
+    if (cur === VENUE && dir > 0) return navigate('visit');
+    if (cur === VISIT && dir < 0) return returnToVenue();
+  }
+
+  /* Horizontal gestures explore the venue; taps open its current object. */
+  var pointerStart = null;
+  app.addEventListener('pointerdown', function(event){
+    if (event.button !== 0 || !event.isPrimary) return;
+    pointerStart = {x:event.clientX, y:event.clientY, id:event.pointerId};
+  });
+  app.addEventListener('pointermove', function(event){
+    if (!pointerStart || cur !== VENUE || busy) return;
+    var dx = event.clientX - pointerStart.x;
+    var dy = event.clientY - pointerStart.y;
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)){
+      app.classList.add('is-dragging');
+      app.setPointerCapture(event.pointerId);
+      cam(dx * .18);
+    }
+  });
+  function endDrag(event){
+    if (!pointerStart) return;
+    var dx = event.clientX - pointerStart.x;
+    var dy = event.clientY - pointerStart.y;
+    pointerStart = null;
+    app.classList.remove('is-dragging');
+    if (app.hasPointerCapture(event.pointerId)) app.releasePointerCapture(event.pointerId);
+    if (cur === VENUE){
+      cam();
+      if (!busy && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)){
+        suppressClickUntil = Date.now() + 600;
+        setScene(sceneIndex + (dx < 0 ? 1 : -1), true);
+      }
+    } else if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx)){
+      go(dy < 0 ? 1 : -1);
+    }
+  }
+  app.addEventListener('pointerup', endDrag);
+  app.addEventListener('pointercancel', function(){
+    pointerStart = null; app.classList.remove('is-dragging'); cam();
+  });
+  var lastWheel = 0;
+  window.addEventListener('wheel', function(event){
+    if (busy || Date.now() - lastWheel < 900) return;
+    if (cur === VENUE && Math.abs(event.deltaX) > 18){
+      lastWheel = Date.now(); setScene(sceneIndex + (event.deltaX > 0 ? 1 : -1), true);
+    } else if (cur !== VENUE && Math.abs(event.deltaY) > 18){
+      lastWheel = Date.now(); go(event.deltaY > 0 ? 1 : -1);
+    }
+  }, {passive:true});
+  window.addEventListener('keydown', function(event){
+    if (event.key === 'Escape' && cur !== VENUE){ returnToVenue(); return; }
+    if (cur === VENUE && !busy && ['ArrowLeft','ArrowRight'].indexOf(event.key) >= 0){
+      event.preventDefault(); setScene(sceneIndex + (event.key === 'ArrowRight' ? 1 : -1), true); return;
+    }
+    if (event.target.closest('a, button, input, textarea, select')) return;
+    if (['ArrowDown','PageDown',' ','Enter'].indexOf(event.key) >= 0){ event.preventDefault(); go(1); }
+    if (['ArrowUp','PageUp'].indexOf(event.key) >= 0){ event.preventDefault(); go(-1); }
+  });
+
+  /* 直接进入内页，保留深链接恢复。 */
+  var jump = parseInt(q.get('page'), 10);
+  var routeIndex = routes.indexOf(location.hash.replace(/^#(?:view=)?/, ''));
+  if (routeIndex > 0 || (jump > 0 && jump < pages.length)){
+    cur = routeIndex > 0 ? routeIndex : jump;
+    var matchingScene = scenes.findIndex(function(scene){ return scene.key === routes[cur]; });
+    intro = false;
+    setScene(matchingScene >= 0 ? matchingScene : 1);
+    history.replaceState({route:routes[cur]}, '', '#view=' + routes[cur]);
+    app.classList.add('no-anim');
+    app.classList.remove('entering');
+    render();
+    void app.offsetWidth;
+    app.classList.remove('no-anim');
+    busy = false;
+  } else {
+    history.replaceState({route:'venue', sceneIndex:sceneIndex}, '', location.pathname + location.search);
+    var roomReady = function(){
+      if (roomReady.done) return; roomReady.done = true;
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){
+        render();
+        intro = false;
+        cam();
+        setTimeout(function(){ app.classList.remove('entering'); busy = false; }, reduceMotion ? 0 : 1950);
+      }); });
+    };
+    if (roomImg.complete) roomReady();
+    else {
+      roomImg.addEventListener('load', roomReady);
+      roomImg.addEventListener('error', roomReady);
+      setTimeout(roomReady, 2500);
+    }
+
+  }
+})();
+</script>
+<script>
+(function(){
+  var audio = document.getElementById('background-music');
+  var button = document.getElementById('music-toggle');
+  var userPaused = false;
+  audio.volume = .65;
+  function sync(){
+    var playing = !audio.paused;
+    button.setAttribute('aria-pressed', String(playing));
+    button.setAttribute('aria-label', playing ? '暂停背景音乐' : '播放背景音乐');
+    button.querySelector('span').textContent = playing ? '暂停音乐' : '播放音乐';
+  }
+  function play(){
+    var pending = audio.play();
+    if (pending) pending.catch(sync);
+  }
+  function unlock(event){
+    if (button.contains(event.target) || userPaused || !audio.paused) return;
+    play();
+  }
+  document.addEventListener('click', unlock, true);
+  document.addEventListener('keydown', unlock, true);
+  button.addEventListener('click', function(){
+    if (audio.paused){ userPaused = false; play(); }
+    else { userPaused = true; audio.pause(); }
+  });
+  audio.addEventListener('play', sync);
+  audio.addEventListener('pause', sync);
+  audio.addEventListener('error', function(){
+    button.querySelector('span').textContent = '音乐加载失败';
+    button.setAttribute('aria-label', '音乐加载失败，点击重试');
+  });
+  play();
+})();
+</script>
+</body>
+</html>
